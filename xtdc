@@ -391,7 +391,7 @@ xtdc_create_tar() {
     local timestamp=$(date +"%Y_%m_%d_%H_%M_%S")
     local output_file="/xtdc/xtdc_zip_${timestamp}.tar.gz"
 
-    # Lista de arquivos/diretórios para incluir (fácil de editar)
+    # Lista de arquivos/diretórios para incluir
     local items_to_include=(
         "/etc/skel"
         "/usr/share/icons/xtdc_icons"
@@ -399,10 +399,7 @@ xtdc_create_tar() {
         "/usr/share/themes/xtdc_dark"
         "/usr/share/fonts/truetype/xtdc_ttf"
         "/bin/xtdc"
-        
-        # Adicione mais itens aqui conforme necessário
     )
-
     echo "📦 Criando arquivo $output_file..."
     tar -czf "$output_file" "${items_to_include[@]}"
     echo "✅ Arquivo criado: $output_file"
