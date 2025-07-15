@@ -15,7 +15,7 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2025_07_14_11_27_24
+# 2025_07_14_15_43_47
 #
 # =================================================⚡
 # CONFIGURAÇÃO DE CORES
@@ -384,6 +384,36 @@ EOL
     echo "Instalação concluída com sucesso!"
     echo "GIMP AppImage instalado em: $INSTALL_DIR/$GIMP_FILENAME"
     echo "Execute com: $INSTALL_DIR/$GIMP_FILENAME"
+}
+
+xtdc_create_tar() {
+    # Define o nome do arquivo com timestamp
+    local timestamp=$(date +"%Y_%m_%d_%H_%M_%S")
+    local output_file="/xtdc/xtdc_zip_${timestamp}.tar.gz"
+
+    # Lista de arquivos/diretórios para incluir (fácil de editar)
+    local items_to_include=(
+        "/etc/skel"
+        "/usr/share/icons/xtdc_icons"
+        "/xtdc/log.txt"
+        # Adicione mais itens aqui conforme necessário
+    )
+
+    echo "📦 Criando arquivo $output_file..."
+    tar -czf "$output_file" "${items_to_include[@]}"
+    echo "✅ Arquivo criado: $output_file"
+}
+
+xtdc_update_from_tar() {
+    local timestamp=$(date +"%Y_%m_%d_%H_%M_%S")
+    local downloaded_file="/xtdc/xtdc_zip_${timestamp}.tar.gz"
+    local tar_url="https://raw.githubusercontent.com/Pinhalito/xtdc/refs/heads/main/xtdc_zip.tar.gz"
+    echo "⬇️ Baixando arquivo de $tar_url..."
+    wget -q "$tar_url" -O "$downloaded_file"
+    echo "Arquivo baixado: $downloaded_file"
+    echo "📦 Extraindo arquivos..."
+    sudo tar -xzf "$downloaded_file" -C /
+    echo "✅ Atualização concluída!"
 }
 
 
