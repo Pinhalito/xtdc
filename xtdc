@@ -395,7 +395,11 @@ xtdc_create_tar() {
     local items_to_include=(
         "/etc/skel"
         "/usr/share/icons/xtdc_icons"
-        "/xtdc/log.txt"
+        "/usr/share/themes/xtdc_theme"
+        "/usr/share/themes/xtdc_dark"
+        "/usr/share/fonts/truetype/xtdc_ttf"
+        "/bin/xtdc"
+        
         # Adicione mais itens aqui conforme necessário
     )
 
