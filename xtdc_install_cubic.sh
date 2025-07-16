@@ -1,4 +1,5 @@
 #!/bin/bash
+#
 #######################
 #    ^...^  `^...^´   #
 #   / o,o \ / O,O \   #
@@ -7,33 +8,25 @@
 #         TdC         #
 #      1998-2025      #
 #######################
+#
 # Toca das Corujas
 # Códigos Binários,
 # Funções de Onda e
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# =============================================================================
-# SCRIPT DE CONFIGURAÇÃO DE SISTEMA - XTDC
-# Funções: 
-#   - Instalação de PPAs
-#   - Instalação de pacotes essenciais
-#   - Limpeza de sistema
-#   - Instalação do LibreOffice como AppImage
-# =============================================================================
+# 2025_07_15_21_54_32
+#
+# =================================================⚡
+# CONFIGURAÇÃO DE CORES
+# =================================================⚡
+COLOR_HEADER="\e[104m"
+COLOR_SUCCESS="\e[1;32m"
+COLOR_WARNING="\e[0;35m"
+COLOR_ERROR="\e[1;31m"
+COLOR_INFO="\e[1;36m"
+COLOR_RESET="\033[0m"
 
-# Cores para saída no terminal
-COLOR_HEADER="\e[104m"       # Azul claro (fundo)
-COLOR_SUCCESS="\e[1;32m"     # Verde brilhante
-COLOR_WARNING="\e[0;35m"     # Roxo
-COLOR_ERROR="\e[1;31m"       # Vermelho brilhante
-COLOR_INFO="\e[1;36m"        # Ciano brilhante
-COLOR_RESET="\033[0m"        # Resetar cor
-
-# =============================================================================
-# FUNÇÃO: Verificar privilégios de root
-# =============================================================================
-check_root() {
     if [ "$(id -u)" -ne 0 ]; then
         printf "${COLOR_WARNING}Este script requer privilégios de root.${COLOR_RESET}\n"
         printf "${COLOR_WARNING}Por favor insira a senha quando solicitado...${COLOR_RESET}\n"
@@ -41,11 +34,8 @@ check_root() {
         exit $?
     fi
     printf "${COLOR_SUCCESS}✓ Privilégios de root confirmados.${COLOR_RESET}\n"
-}
 
-# =============================================================================
-# FUNÇÃO: Instalar repositórios PPA
-# =============================================================================
+# =================================================⚡
 xtdc_ppa() {
     declare -Ag PPAS=(
         ["afelinczak/ppa"]="Cliptit - Clipboard manager"
@@ -82,9 +72,7 @@ xtdc_ppa() {
     printf "\n${COLOR_SUCCESS}✔ PPAs configurados com sucesso${COLOR_RESET}\n"
 }
 
-# =============================================================================
-# FUNÇÃO: Instalar pacotes principais
-# =============================================================================
+# =================================================⚡
 xtdc_pkg() {
     local BRAVE_EXT_DIR="/opt/brave.com/brave/extensions"
     
@@ -192,9 +180,7 @@ xtdc_pkg() {
     printf "\n${COLOR_SUCCESS}✔ Instalação concluída com sucesso${COLOR_RESET}\n"
 }
 
-# =============================================================================
-# FUNÇÃO: Limpeza do sistema
-# =============================================================================
+# =================================================⚡
 xtdc_limpeza() {
     # Lista consolidada de pacotes para remoção
     declare -a PACOTES_REMOVER=(
@@ -300,10 +286,6 @@ xtdc_limpeza() {
     printf "\n${COLOR_SUCCESS}✔ Limpeza concluída com sucesso${COLOR_RESET}\n"
     printf "${COLOR_WARNING}⚠ Recomenda-se reiniciar o sistema.${COLOR_RESET}\n"
 }
-
-# =============================================================================
-# FUNÇÃO: Instalar LibreOffice como AppImage
-# =============================================================================
 
 # =================================================⚡
 xtdc_install_libreoffice_appimage() {
@@ -496,9 +478,8 @@ EOL
     echo "Execute com: $INSTALL_DIR/$GIMP_FILENAME"
 }
 
-# =============================================================================
-# Configurações adicionais do LightDM
-# =============================================================================
+# =================================================⚡
+xtdc_tema() {
 LIGHTDM_CONF_DIR="/usr/share/lightdm/lightdm-gtk-greeter.conf.d"
 printf "\n${COLOR_INFO}➔ Configurando LightDM...${COLOR_RESET}\n"
 
@@ -513,12 +494,4 @@ apt purge yelp yelp-xsl
 
 # Atualizar banco de dados de aplicativos
 update-desktop-database /etc/skel/.local/share/applications/
-
-# =============================================================================
-# EXECUÇÃO PRINCIPAL
-# =============================================================================
-check_root
-xtdc_ppa
-xtdc_pkg
-xtdc_limpeza
-xtdc_install_libreoffice_appimage
+}
