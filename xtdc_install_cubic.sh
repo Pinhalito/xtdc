@@ -304,35 +304,66 @@ xtdc_limpeza() {
 # =============================================================================
 # FUNÇÃO: Instalar LibreOffice como AppImage
 # =============================================================================
+
+# =================================================⚡
 xtdc_install_libreoffice_appimage() {
+    # Verificar se é root
     if [[ $EUID -ne 0 ]]; then
-        echo "Este script precisa ser executado como root"
+        echo "Este script precisa ser executado como root" >&2
         return 1
     fi
 
+    # Configurações
     local LO_URL="https://appimages.libreitalia.org/LibreOffice-fresh.standard-x86_64.AppImage"
     local LO_FILENAME="LibreOffice-fresh.standard-x86_64.AppImage"
-    local INSTALL_DIR="/xtdc/appimages"
-    local DESKTOP_FILE="/usr/share/applications/libreoffice-appimage.desktop"
+    local INSTALL_DIR="/xtdc25/AppImages"
+    local DESKTOP_FILE="$HOME/.local/share/applications/libreoffice-appimage.desktop"
+    local ICON_URL="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/LibreOffice_Main_Logo.png/240px-LibreOffice_Main_Logo.png"
+    local ICON_PATH="/usr/share/icons/xtdc_icons/apps/libreoffice.png"
+
+    # MIME types para configurar
+    local MIME_TYPES=(
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        "application/msword"
+        "application/vnd.ms-excel"
+        "application/vnd.ms-powerpoint"
+        "application/vnd.oasis.opendocument.text"
+        "application/vnd.oasis.opendocument.spreadsheet"
+        "application/vnd.oasis.opendocument.presentation"
+    )
 
     # Criar diretório de instalação
     mkdir -p "$INSTALL_DIR" || {
-        echo "Erro ao criar diretório $INSTALL_DIR"
+        echo "Erro ao criar diretório $INSTALL_DIR" >&2
         return 1
     }
 
-    # Baixar o AppImage
+    # Baixar AppImage
     echo "Baixando LibreOffice AppImage..."
     wget -q --show-progress -O "$INSTALL_DIR/$LO_FILENAME" "$LO_URL" || {
-        echo "Erro ao baixar o arquivo"
+        echo "Erro ao baixar o arquivo" >&2
         return 1
     }
 
     # Tornar executável
     chmod +x "$INSTALL_DIR/$LO_FILENAME" || {
-        echo "Erro ao tornar o AppImage executável"
+        echo "Erro ao tornar o AppImage executável" >&2
         return 1
     }
+
+    # Criar diretório de ícones se não existir
+    mkdir -p "$(dirname "$ICON_PATH")"
+
+    # Baixar ícone se não existir
+    if [[ ! -f "$ICON_PATH" ]]; then
+        echo "Baixando ícone do LibreOffice..."
+        wget -q -O "$ICON_PATH" "$ICON_URL" || {
+            echo "Erro ao baixar o ícone" >&2
+            # Não é crítico, então continuamos
+        }
+    fi
 
     # Criar arquivo .desktop
     echo "Criando arquivo .desktop..."
@@ -341,46 +372,128 @@ xtdc_install_libreoffice_appimage() {
 Type=Application
 Name=LibreOffice
 Comment=Suíte Office Completa
-Exec=/xtdc/appimages/LibreOffice-fresh.standard-x86_64.AppImage
-Icon=/usr/share/icons/xtdc_icons/apps/libreoffice.png
+Exec=$INSTALL_DIR/$LO_FILENAME
+Icon=$ICON_PATH
 Terminal=false
 Categories=Office;
-MimeType=application/vnd.openxmlformats-officedocument.wordprocessingml.document;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;application/vnd.openxmlformats-officedocument.presentationml.presentation;application/msword;application/vnd.ms-excel;application/vnd.ms-powerpoint;application/vnd.oasis.opendocument.text;application/vnd.oasis.opendocument.spreadsheet;application/vnd.oasis.opendocument.presentation;
+MimeType=$(IFS=';'; echo "${MIME_TYPES[*]}")
 StartupNotify=true
 EOL
 
-    # Atualizar banco de dados de desktop
+    # Atualizar banco de dados desktop
     update-desktop-database || {
-        echo "Erro ao atualizar o banco de dados de desktop"
+        echo "Erro ao atualizar o banco de dados de desktop" >&2
         return 1
     }
 
     # Configurar como aplicativo padrão
     echo "Configurando como aplicativo padrão..."
-    local MIME_TYPES=(
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-        "application/msword"
-        "application/vnd.ms-excel"
-        "application/vnd.ms-powerpoint"
-    )
-
     for mime in "${MIME_TYPES[@]}"; do
         xdg-mime default libreoffice-appimage.desktop "$mime" || {
-            echo "Erro ao configurar padrão para $mime"
+            echo "Erro ao configurar padrão para $mime" >&2
         }
     done
 
-    # Baixar ícone se não existir
-    if [[ ! -f "/usr/share/icons/libreoffice-main.png" ]]; then
-        echo "Baixando ícone do LibreOffice..."
-        wget -q -O /usr/share/icons/libreoffice-main.png \
-            https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/LibreOffice_Main_Logo.png/240px-LibreOffice_Main_Logo.png
-    fi
-
     echo "Instalação concluída com sucesso!"
     echo "LibreOffice AppImage instalado em: $INSTALL_DIR/$LO_FILENAME"
+}
+
+# =================================================⚡
+xtdc_install_gimp_appimage() {
+    # Verificar se é root
+    if [[ $EUID -ne 0 ]]; then
+        echo "Este script precisa ser executado como root" >&2
+        return 1
+    fi
+
+    # Configurações
+    local GIMP_URL="https://edgeuno-bog2.mm.fcix.net/gimp/gimp/v3.0/linux/GIMP-3.0.4-x86_64.AppImage"
+    local GIMP_FILENAME="GIMP-3.0.4-x86_64.AppImage"
+    local INSTALL_DIR="/xtdc25/AppImages"
+    local DESKTOP_FILE="$HOME/.local/share/applications/gimp-appimage.desktop"
+    local ICON_URL="https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/The_GIMP_icon_-_gnome.svg/240px-The_GIMP_icon_-_gnome.svg.png"
+    local ICON_PATH="/usr/share/icons/xtdc_icons/apps/gimp.png"
+
+    # MIME types para configurar
+    local MIME_TYPES=(
+        "image/bmp"
+        "image/gif"
+        "image/jpeg"
+        "image/jpg"
+        "image/png"
+        "image/svg+xml"
+        "image/tiff"
+        "image/webp"
+        "image/x-eps"
+        "image/x-psd"
+        "image/x-tga"
+        "application/postscript"
+    )
+
+    # Criar diretório de instalação
+    mkdir -p "$INSTALL_DIR" || {
+        echo "Erro ao criar diretório $INSTALL_DIR" >&2
+        return 1
+    }
+
+    # Baixar AppImage
+    echo "Baixando GIMP AppImage..."
+    wget -q --show-progress -O "$INSTALL_DIR/$GIMP_FILENAME" "$GIMP_URL" || {
+        echo "Erro ao baixar o arquivo" >&2
+        return 1
+    }
+
+    # Tornar executável
+    chmod +x "$INSTALL_DIR/$GIMP_FILENAME" || {
+        echo "Erro ao tornar o AppImage executável" >&2
+        return 1
+    }
+
+    # Criar diretório de ícones se não existir
+    mkdir -p "$(dirname "$ICON_PATH")"
+
+    # Baixar ícone se não existir
+    if [[ ! -f "$ICON_PATH" ]]; then
+        echo "Baixando ícone do GIMP..."
+        wget -q -O "$ICON_PATH" "$ICON_URL" || {
+            echo "Erro ao baixar o ícone" >&2
+            # Não é crítico, então continuamos
+        }
+    fi
+
+    # Criar arquivo .desktop
+    echo "Criando arquivo .desktop..."
+    cat > "$DESKTOP_FILE" <<EOL
+[Desktop Entry]
+Type=Application
+Name=GIMP
+Comment=Editor de imagens avançado
+Exec=$INSTALL_DIR/$GIMP_FILENAME
+Icon=$ICON_PATH
+Terminal=false
+Categories=Graphics;
+MimeType=$(IFS=';'; echo "${MIME_TYPES[*]}")
+StartupNotify=true
+Keywords=imagem;editor;GIMP;graphic;design;illustration;painting;
+EOL
+
+    # Atualizar banco de dados desktop
+    update-desktop-database || {
+        echo "Erro ao atualizar o banco de dados de desktop" >&2
+        return 1
+    }
+
+    # Configurar como aplicativo padrão
+    echo "Configurando como aplicativo padrão..."
+    for mime in "${MIME_TYPES[@]}"; do
+        xdg-mime default gimp-appimage.desktop "$mime" || {
+            echo "Erro ao configurar padrão para $mime" >&2
+        }
+    done
+
+    echo "Instalação concluída com sucesso!"
+    echo "GIMP AppImage instalado em: $INSTALL_DIR/$GIMP_FILENAME"
+    echo "Execute com: $INSTALL_DIR/$GIMP_FILENAME"
 }
 
 # =============================================================================

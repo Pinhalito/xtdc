@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#
 #######################
 #    ^...^  `^...^´   #
 #   / o,o \ / O,O \   #
@@ -15,7 +15,7 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2025_07_14_15_43_47
+# 2025_07_15_21_50_33
 #
 # =================================================⚡
 # CONFIGURAÇÃO DE CORES
@@ -36,7 +36,7 @@ xtdc_printa(){
     local agora=$(date +%Y_%m_%d_%H_%M_%S)
     local destino="/mnt/UM/IMAGENS/PRINTS"
     mkdir -p "$destino"
-    local temp_file=$(mktemp "/tmp/xfce_screenshot_XXXXXX.png")
+    local temp_file=$(mktemp "/tmp/temporario_XXXXXX.png")
 
     if xfce4-screenshooter -rc -s "$temp_file" 2>/dev/null; then
         if [[ -s "$temp_file" ]]; then
@@ -59,26 +59,18 @@ xtdc_printa(){
 xtdc_update() {
     local github_url="https://raw.githubusercontent.com/Pinhalito/xtdc25/main/xtdc"
     local temp_file=$(mktemp /tmp/xtdc_update.XXXXXX)
-    local installed_script="/bin/xtdc"  # Caminho absoluto fixo
-
-    # Verifica se os comandos necessários existem
-    for cmd in wget sudo cp chmod; do
-        if ! command -v "$cmd" >/dev/null 2>&1; then
-            echo -e "${COLOR_ERROR}❌ Comando obrigatório não encontrado: $cmd${COLOR_RESET}"
-            return 1
-        fi
-    done
+    local installed_script="/bin/xtdc"
 
     echo -e "${COLOR_INFO}🔍 Baixando atualização do GitHub...${COLOR_RESET}"
 
-    # Baixa a versão mais recente (ignorando comparação)
+    # Baixa a versão mais recente
     if ! wget -q "$github_url" -O "$temp_file"; then
         echo -e "${COLOR_ERROR}❌ Falha ao baixar a nova versão${COLOR_RESET}"
         rm -f "$temp_file"
         return 1
     fi
 
-    # Substitui o arquivo local SEMPRE (sem checar diferenças)
+    # Substitui o arquivo local
     if sudo cp "$temp_file" "$installed_script" && sudo chmod +x "$installed_script"; then
         echo -e "${COLOR_SUCCESS}✅ Script atualizado para a versão mais recente!${COLOR_RESET}"
     else
@@ -147,12 +139,10 @@ xtdc_desembaralha() {
 xtdc_senha_de_sempre() {
 	desembaralha U2FsdGVkX19QKHP8C3kiSjD19OJAZHKaE/D0PPzyg3uHU2R1dv0ad27Kvtp2T5OYSPWq5+b7R5qNQYaaR2/I0Yip+NT4hTbO/FoMOEPRV4uEo1B6aeQxERclHK8mBg9o4XyqTXPRbj0uyy0e94vs1A==
     desembaralha U2FsdGVkX1/VJICs1wTvNZAIiVnTDZL5IDEPb4r7qVn4ZKczhJGBOUW9xL2F6UpfUe9ojkUyHNQr50DCMEzxBs3Os9gNd6luCgLyJgfCNmpUiLOOW/Zy+GHaN4rAGdt8G3wO/+deYxEMNiCeeGUknQ==
-    
 }
 
 # =================================================⚡
 xtdc_bkp() {
-# Configuração simplificada - adicione seus diretórios entre os parênteses
 DIRETORIOS=(
     "/mnt/DOIS/NOVOXTDC/CUBIC2/custom-root/etc/skel"
     "/mnt/DOIS/NOVOXTDC/CUBIC2/custom-root/usr/share/themes/xtdc_theme"
@@ -161,7 +151,7 @@ DIRETORIOS=(
 )
 
 # Nome do arquivo de backup com timestamp
-BACKUP_FILE="bkp_$(date +'%Y_%m_%d_%H_%M_%S').tar.gz"
+BACKUP_FILE="/xtdc/xtdc_bkp_$(date +'%Y_%m_%d_%H_%M_%S').tar.gz"
 
 # Mostra os diretórios que serão incluídos no backup
 echo "=============================================="
@@ -181,7 +171,6 @@ if [[ ! $REPLY =~ ^[Ss]$ ]]; then
     exit 1
 fi
 
-# Cria o backup no formato tar.gz (melhor balance entre compressão e compatibilidade)
 echo "Criando backup: $BACKUP_FILE"
 tar -czf "$BACKUP_FILE" "${DIRETORIOS[@]}"
 
@@ -195,201 +184,10 @@ else
 fi
 }
 
-# =================================================⚡
-xtdc_install_libreoffice_appimage() {
-    # Verificar se é root
-    if [[ $EUID -ne 0 ]]; then
-        echo "Este script precisa ser executado como root" >&2
-        return 1
-    fi
-
-    # Configurações
-    local LO_URL="https://appimages.libreitalia.org/LibreOffice-fresh.standard-x86_64.AppImage"
-    local LO_FILENAME="LibreOffice-fresh.standard-x86_64.AppImage"
-    local INSTALL_DIR="/xtdc25/AppImages"
-    local DESKTOP_FILE="$HOME/.local/share/applications/libreoffice-appimage.desktop"
-    local ICON_URL="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/LibreOffice_Main_Logo.png/240px-LibreOffice_Main_Logo.png"
-    local ICON_PATH="/usr/share/icons/xtdc_icons/apps/libreoffice.png"
-
-    # MIME types para configurar
-    local MIME_TYPES=(
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-        "application/msword"
-        "application/vnd.ms-excel"
-        "application/vnd.ms-powerpoint"
-        "application/vnd.oasis.opendocument.text"
-        "application/vnd.oasis.opendocument.spreadsheet"
-        "application/vnd.oasis.opendocument.presentation"
-    )
-
-    # Criar diretório de instalação
-    mkdir -p "$INSTALL_DIR" || {
-        echo "Erro ao criar diretório $INSTALL_DIR" >&2
-        return 1
-    }
-
-    # Baixar AppImage
-    echo "Baixando LibreOffice AppImage..."
-    wget -q --show-progress -O "$INSTALL_DIR/$LO_FILENAME" "$LO_URL" || {
-        echo "Erro ao baixar o arquivo" >&2
-        return 1
-    }
-
-    # Tornar executável
-    chmod +x "$INSTALL_DIR/$LO_FILENAME" || {
-        echo "Erro ao tornar o AppImage executável" >&2
-        return 1
-    }
-
-    # Criar diretório de ícones se não existir
-    mkdir -p "$(dirname "$ICON_PATH")"
-
-    # Baixar ícone se não existir
-    if [[ ! -f "$ICON_PATH" ]]; then
-        echo "Baixando ícone do LibreOffice..."
-        wget -q -O "$ICON_PATH" "$ICON_URL" || {
-            echo "Erro ao baixar o ícone" >&2
-            # Não é crítico, então continuamos
-        }
-    fi
-
-    # Criar arquivo .desktop
-    echo "Criando arquivo .desktop..."
-    cat > "$DESKTOP_FILE" <<EOL
-[Desktop Entry]
-Type=Application
-Name=LibreOffice
-Comment=Suíte Office Completa
-Exec=$INSTALL_DIR/$LO_FILENAME
-Icon=$ICON_PATH
-Terminal=false
-Categories=Office;
-MimeType=$(IFS=';'; echo "${MIME_TYPES[*]}")
-StartupNotify=true
-EOL
-
-    # Atualizar banco de dados desktop
-    update-desktop-database || {
-        echo "Erro ao atualizar o banco de dados de desktop" >&2
-        return 1
-    }
-
-    # Configurar como aplicativo padrão
-    echo "Configurando como aplicativo padrão..."
-    for mime in "${MIME_TYPES[@]}"; do
-        xdg-mime default libreoffice-appimage.desktop "$mime" || {
-            echo "Erro ao configurar padrão para $mime" >&2
-        }
-    done
-
-    echo "Instalação concluída com sucesso!"
-    echo "LibreOffice AppImage instalado em: $INSTALL_DIR/$LO_FILENAME"
-}
-
-# =================================================⚡
-xtdc_install_gimp_appimage() {
-    # Verificar se é root
-    if [[ $EUID -ne 0 ]]; then
-        echo "Este script precisa ser executado como root" >&2
-        return 1
-    fi
-
-    # Configurações
-    local GIMP_URL="https://edgeuno-bog2.mm.fcix.net/gimp/gimp/v3.0/linux/GIMP-3.0.4-x86_64.AppImage"
-    local GIMP_FILENAME="GIMP-3.0.4-x86_64.AppImage"
-    local INSTALL_DIR="/xtdc25/AppImages"
-    local DESKTOP_FILE="$HOME/.local/share/applications/gimp-appimage.desktop"
-    local ICON_URL="https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/The_GIMP_icon_-_gnome.svg/240px-The_GIMP_icon_-_gnome.svg.png"
-    local ICON_PATH="/usr/share/icons/xtdc_icons/apps/gimp.png"
-
-    # MIME types para configurar
-    local MIME_TYPES=(
-        "image/bmp"
-        "image/gif"
-        "image/jpeg"
-        "image/jpg"
-        "image/png"
-        "image/svg+xml"
-        "image/tiff"
-        "image/webp"
-        "image/x-eps"
-        "image/x-psd"
-        "image/x-tga"
-        "application/postscript"
-    )
-
-    # Criar diretório de instalação
-    mkdir -p "$INSTALL_DIR" || {
-        echo "Erro ao criar diretório $INSTALL_DIR" >&2
-        return 1
-    }
-
-    # Baixar AppImage
-    echo "Baixando GIMP AppImage..."
-    wget -q --show-progress -O "$INSTALL_DIR/$GIMP_FILENAME" "$GIMP_URL" || {
-        echo "Erro ao baixar o arquivo" >&2
-        return 1
-    }
-
-    # Tornar executável
-    chmod +x "$INSTALL_DIR/$GIMP_FILENAME" || {
-        echo "Erro ao tornar o AppImage executável" >&2
-        return 1
-    }
-
-    # Criar diretório de ícones se não existir
-    mkdir -p "$(dirname "$ICON_PATH")"
-
-    # Baixar ícone se não existir
-    if [[ ! -f "$ICON_PATH" ]]; then
-        echo "Baixando ícone do GIMP..."
-        wget -q -O "$ICON_PATH" "$ICON_URL" || {
-            echo "Erro ao baixar o ícone" >&2
-            # Não é crítico, então continuamos
-        }
-    fi
-
-    # Criar arquivo .desktop
-    echo "Criando arquivo .desktop..."
-    cat > "$DESKTOP_FILE" <<EOL
-[Desktop Entry]
-Type=Application
-Name=GIMP
-Comment=Editor de imagens avançado
-Exec=$INSTALL_DIR/$GIMP_FILENAME
-Icon=$ICON_PATH
-Terminal=false
-Categories=Graphics;
-MimeType=$(IFS=';'; echo "${MIME_TYPES[*]}")
-StartupNotify=true
-Keywords=imagem;editor;GIMP;graphic;design;illustration;painting;
-EOL
-
-    # Atualizar banco de dados desktop
-    update-desktop-database || {
-        echo "Erro ao atualizar o banco de dados de desktop" >&2
-        return 1
-    }
-
-    # Configurar como aplicativo padrão
-    echo "Configurando como aplicativo padrão..."
-    for mime in "${MIME_TYPES[@]}"; do
-        xdg-mime default gimp-appimage.desktop "$mime" || {
-            echo "Erro ao configurar padrão para $mime" >&2
-        }
-    done
-
-    echo "Instalação concluída com sucesso!"
-    echo "GIMP AppImage instalado em: $INSTALL_DIR/$GIMP_FILENAME"
-    echo "Execute com: $INSTALL_DIR/$GIMP_FILENAME"
-}
-
-xtdc_create_tar() {
+xtdc_bkp2() {
     # Define o nome do arquivo com timestamp
     local timestamp=$(date +"%Y_%m_%d_%H_%M_%S")
-    local output_file="/xtdc/xtdc_zip_${timestamp}.tar.gz"
+    local output_file="/xtdc/xtdc_bkp_${timestamp}.tar.gz"
 
     # Lista de arquivos/diretórios para incluir
     local items_to_include=(
