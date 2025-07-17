@@ -15,7 +15,7 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2025_07_15_21_54_32
+# 2025_07_16_20_53_23
 #
 # =================================================⚡
 # CONFIGURAÇÃO DE CORES
@@ -27,79 +27,78 @@ COLOR_ERROR="\e[1;31m"
 COLOR_INFO="\e[1;36m"
 COLOR_RESET="\033[0m"
 
-    if [ "$(id -u)" -ne 0 ]; then
-        printf "${COLOR_WARNING}Este script requer privilégios de root.${COLOR_RESET}\n"
-        printf "${COLOR_WARNING}Por favor insira a senha quando solicitado...${COLOR_RESET}\n"
-        sudo "$0" "$@"
-        exit $?
-    fi
-    printf "${COLOR_SUCCESS}✓ Privilégios de root confirmados.${COLOR_RESET}\n"
-
 # =================================================⚡
 xtdc_ppa() {
-    declare -Ag PPAS=(
-        ["afelinczak/ppa"]="Cliptit - Clipboard manager"
-        ["cubic-wizard/release"]="Cubic Customizer"
-        ["geany-dev/ppa"]="Geany IDE (versão mais recente)"
-        ["inkscape.dev/stable"]="Inkscape (última versão estável)"
-        ["maarten-baert/simplescreenrecorder"]="SimpleScreenRecorder"
-        ["otto-kesselgulasch/gimp"]="GIMP (versões mais recentes)"
-        ["team-xbmc/ppa"]="Kodi Media Center"
-        ["kisak/kisak-mesa"]="Drivers AMD Ryzen 5 2400G with Radeon Vega Graphics"
+    local PPAS=(
+        afelinczak/ppa
+        cubic-wizard/release
+        geany-dev/ppa
+        inkscape.dev/stable
+        maarten-baert/simplescreenrecorder
+        otto-kesselgulasch/gimp
+        team-xbmc/ppa
+        kisak/kisak-mesa
     )
+    
+    echo "▶ Instalando PPAs..."
+    local needs_update=0
 
-    printf "${COLOR_HEADER}⚡ INSTALANDO REPOSITÓRIOS PPA ⚡${COLOR_RESET}\n\n"
-    local NEEDS_UPDATE=0
-
-    for ppa in "${!PPAS[@]}"; do
-        printf "➔ ${PPAS[$ppa]}... "
-        if ! grep -rq "ppa.launchpad.net/$ppa" /etc/apt/sources.list /etc/apt/sources.list.d/; then
+    for ppa in "${PPAS[@]}"; do
+        echo -n "• $ppa... "
+        if ! grep -rq "$ppa" /etc/apt/sources.list /etc/apt/sources.list.d/; then
             if add-apt-repository -y "ppa:$ppa" >/dev/null 2>&1; then
-                printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
-                NEEDS_UPDATE=1
+                echo "OK"
+                needs_update=1
             else
-                printf "${COLOR_ERROR}FALHOU${COLOR_RESET}\n"
+                echo "FALHOU"
             fi
         else
-            printf "${COLOR_INFO}JÁ INSTALADO${COLOR_RESET}\n"
+            echo "JÁ INSTALADO"
         fi
     done
 
-    if [ "$NEEDS_UPDATE" -eq 1 ]; then
-        printf "\n${COLOR_INFO}🔄 Atualizando lista de pacotes...${COLOR_RESET}\n"
-        apt-get update -qq
-    fi
-    printf "\n${COLOR_SUCCESS}✔ PPAs configurados com sucesso${COLOR_RESET}\n"
+    [ "$needs_update" -eq 1 ] && apt-get update -qq
+    echo "✔ Concluído!"
 }
 
 # =================================================⚡
 xtdc_pkg() {
-    local BRAVE_EXT_DIR="/opt/brave.com/brave/extensions"
-    
-    # Lista consolidada de pacotes para instalação
     declare -a PKGS=(
-        # Utilitários de sistema
-        rclone-browser transmission smplayer simplescreenrecorder
-        eog shotwell baobab clipit file-roller catfish menulibre
-        curl bleachbit evince geany gnome-disk-utility
-        gnome-system-monitor gnome-system-tools gparted
-        p7zip-full rar unrar thunar-archive-plugin
-        speedcrunch synaptic tree xfpanel-switch zenity xclip
-        
-        # Pacotes de idioma
-        language-pack-gnome-pt language-pack-gnome-pt-base 
-        language-pack-pt language-pack-pt-base
-        
-        # Rede e compartilhamento
-        fusesmb gvfs-backends gvfs-fuse samba-libs
+        baobab
+        bleachbit
+        catfish
+        clipit
+        curl
+        curl
+        eog
+        evince
+        file-roller
+        geany
+        gnome-disk-utility
+        gnome-system-monitor
+        gnome-system-tools
+        gparted
+        menulibre
+        p7zip-full
+        rar
+        shotwell
+        simplescreenrecorder
+        smplayer
+        speedcrunch
+        synaptic
+        thunar-archive-plugin
+        transmission
+        tree
+        unrar
+        xclip
+        xfpanel-switch
+        zenity
+        language-pack-gnome-pt
+        language-pack-gnome-pt-base
+        language-pack-pt 
+        language-pack-pt-base
     )
-
-    # Extensões do Brave Browser
-    declare -Ag BRAVE_EXT=(
-        ["ponfpcnoihfmfllpaingbgckeeldkhle"]="Enhancer for YouTube™"
-        ["mnjggcdmjocbbbhaepdhchncahnbgone"]="SponsorBlock para YouTube"
-    )
-
+    
     printf "${COLOR_HEADER}⚡ INSTALANDO PACOTES E APLICATIVOS ⚡${COLOR_RESET}\n\n"
     
     # Atualizar repositórios
@@ -164,6 +163,11 @@ xtdc_pkg() {
     fi
     
     # Extensões do Brave
+    local BRAVE_EXT_DIR="/opt/brave.com/brave/extensions"
+    declare -Ag BRAVE_EXT=(
+        ["ponfpcnoihfmfllpaingbgckeeldkhle"]="Enhancer for YouTube™"
+        ["mnjggcdmjocbbbhaepdhchncahnbgone"]="SponsorBlock para YouTube"
+    )
     printf "\n➔ EXTENSÕES DO BRAVE\n"
     mkdir -p "$BRAVE_EXT_DIR" 2>/dev/null
     
@@ -184,49 +188,43 @@ xtdc_pkg() {
 xtdc_limpeza() {
     # Lista consolidada de pacotes para remoção
     declare -a PACOTES_REMOVER=(
-        # Snap e relacionados
-        snapd gnome-software-plugin-snap
-        
-        # Pacotes do LibreOffice
+        snapd
+        gnome-software-plugin-snap
         libreoffice-*
-        
-        # Jogos
-        gnome-mahjongg gnome-sudoku gnome-mines aisleriot
-        
-        # Bluetooth e impressão
-        bluetooth bluez* cups-browsed printer-driver-*
-        
-        # Serviços desnecessários
-        zeitgeist* apport apport-symptoms thunderbird
-        
-        # Aplicativos não utilizados
-        cheese deja-dup duplicity gnome-characters gnome-font-viewer
-        gnome-initial-setup gnome-logs gnome-online-accounts
-        gnome-software-plugin-snap openvpn* remmina rhythmbox
-        totem shotwell ubuntu-docs usb-creator-gtk yelp yelp-xsl
-        
-        # Pacotes de idioma não utilizados
-        language-pack-de language-pack-de-base language-pack-en
-        language-pack-en-base language-pack-es language-pack-es-base
-        language-pack-fr language-pack-fr-base language-pack-gnome-de
-        language-pack-gnome-de-base language-pack-gnome-en
-        language-pack-gnome-en-base language-pack-gnome-es
-        language-pack-gnome-es-base language-pack-gnome-fr
-        language-pack-gnome-fr-base language-pack-gnome-it
-        language-pack-gnome-it-base language-pack-gnome-ru-base
-        language-pack-gnome-zh-hans language-pack-gnome-zh-hans-base
-        language-pack-gnome-ru language-pack-it language-pack-it-base
-        language-pack-ru language-pack-ru-base language-pack-zh-hans
-        language-pack-zh-hans-base
+        gnome-mahjongg
+        gnome-sudoku
+        gnome-mines
+        aisleriot
+        bluetooth
+        bluez*
+        cups
+        cups-browsed
+        printer-driver-*
+        zeitgeist*
+        apport
+        apport-symptoms
+        thunderbird
+        cheese
+        deja-dup
+        duplicity
+        gnome-characters
+        gnome-font-viewer
+        gnome-initial-setup
+        gnome-logs
+        gnome-online-accounts
+        gnome-software-plugin-snap
+        openvpn*
+        remmina
+        rhythmbox
+        totem
+        shotwell
+        ubuntu-docs
+        usb-creator-gtk
+        yelp
+        yelp-xsl
     )
 
     printf "${COLOR_HEADER}⚡ LIMPEZA DO SISTEMA ⚡${COLOR_RESET}\n\n"
-    
-    # Verificar se o sistema de pacotes está disponível
-    if ! command -v apt-get &>/dev/null || ! command -v dpkg &>/dev/null; then
-        printf "${COLOR_ERROR}✖ Erro: Sistema de pacotes não encontrado${COLOR_RESET}\n"
-        return 1
-    fi
 
     # Atualizar lista de pacotes
     printf "➔ Atualizando lista de pacotes... "
@@ -298,7 +296,7 @@ xtdc_install_libreoffice_appimage() {
     # Configurações
     local LO_URL="https://appimages.libreitalia.org/LibreOffice-fresh.standard-x86_64.AppImage"
     local LO_FILENAME="LibreOffice-fresh.standard-x86_64.AppImage"
-    local INSTALL_DIR="/xtdc25/AppImages"
+    local INSTALL_DIR="/xtdc/AppImages"
     local DESKTOP_FILE="$HOME/.local/share/applications/libreoffice-appimage.desktop"
     local ICON_URL="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/LibreOffice_Main_Logo.png/240px-LibreOffice_Main_Logo.png"
     local ICON_PATH="/usr/share/icons/xtdc_icons/apps/libreoffice.png"
@@ -480,18 +478,67 @@ EOL
 
 # =================================================⚡
 xtdc_tema() {
-LIGHTDM_CONF_DIR="/usr/share/lightdm/lightdm-gtk-greeter.conf.d"
-printf "\n${COLOR_INFO}➔ Configurando LightDM...${COLOR_RESET}\n"
+    local LIGHTDM_CONF_DIR="/usr/share/lightdm/lightdm-gtk-greeter.conf.d"
+    
+    printf "\n${COLOR_HEADER}⚡ CONFIGURANDO TEMA ⚡${COLOR_RESET}\n"
+    
+    if [ -d "/usr/share/lightdm" ]; then
+        printf "  ➔ Configurando LightDM... "
+        
+        mkdir -p "${LIGHTDM_CONF_DIR}" && chmod 755 "${LIGHTDM_CONF_DIR}" && {
+            # Configuração para Ubuntu
+            cat <<EOF | tee "${LIGHTDM_CONF_DIR}/01_ubuntu.conf" >/dev/null
+[greeter]
+background=#000000
+theme-name=xtdc_theme
+icon-theme-name=xtdc_icons
+font-name=Ubuntu 13
+indicators=~host;~spacer;~session;~language;~a11y;~clock;~power;
+clock-format=%d %b, %H:%M
+EOF
 
-# Criar arquivo de timestamp
-filename=$(date +"%Y_%m_%d_%H_%M_%S").txt && echo "$(date +"%Y-%m-%d %H:%M:%S")" > "$filename"
+            # Configuração para Xubuntu
+            cat <<EOF | tee "${LIGHTDM_CONF_DIR}/30_xubuntu.conf" >/dev/null
+[greeter]
+background=#000000
+theme-name=xtdc_theme
+icon-theme-name=xtdc_icons
+font-name=Noto Sans 11
+keyboard=onboard
+screensaver-timeout=60
+EOF
 
-# Atualizar cache de fontes
-sudo fc-cache -f -v
+            chmod 644 "${LIGHTDM_CONF_DIR}"/*.conf 2>/dev/null
+            printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+        } || {
+            printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
+            return 1
+        }
+    else
+        printf "  ✖ ${COLOR_WARNING}LightDM não encontrado${COLOR_RESET}\n"
+    fi
 
-# Remover pacotes Yelp (documentação)
-apt purge yelp yelp-xsl
+    # Configurações adicionais de tema
+    printf "  ➔ Atualizando cache de fontes... "
+    fc-cache -f -v >/dev/null 2>&1 && \
+    printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n" || \
+    printf "${COLOR_WARNING}FALHA${COLOR_RESET}\n"
 
-# Atualizar banco de dados de aplicativos
-update-desktop-database /etc/skel/.local/share/applications/
+    printf "  ➔ Removendo documentação desnecessária... "
+    if dpkg -l yelp >/dev/null 2>&1; then
+        apt purge -y yelp yelp-xsl >/dev/null 2>&1 && \
+        printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n" || \
+        printf "${COLOR_WARNING}FALHA${COLOR_RESET}\n"
+    else
+        printf "${COLOR_INFO}JÁ REMOVIDO${COLOR_RESET}\n"
+    fi
+
+    printf "  ➔ Atualizando banco de dados de aplicativos... "
+    update-desktop-database /etc/skel/.local/share/applications/ >/dev/null 2>&1 && \
+    printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n" || \
+    printf "${COLOR_WARNING}FALHA${COLOR_RESET}\n"
+
+    printf "\n${COLOR_SUCCESS}✔ Configuração de tema concluída${COLOR_RESET}\n"
 }
+
+# FIM
