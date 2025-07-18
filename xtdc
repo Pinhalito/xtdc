@@ -15,7 +15,7 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2025_07_15_21_54_32
+# 2025_07_17_21_52_20
 #
 # =================================================⚡
 # CONFIGURAÇÃO DE CORES
@@ -32,22 +32,25 @@ COLOR_RESET="\033[0m"
 # Descrição: Captura uma região da tela, salva em um arquivo com data/hora e copia para o clipboard
 # Uso: xtdc_printa
 # =================================================⚡
-xtdc_printa(){
+xtdc_printa() {
     local agora=$(date +%Y_%m_%d_%H_%M_%S)
     local destino="/mnt/UM/IMAGENS/PRINTS"
     mkdir -p "$destino"
     local temp_file=$(mktemp "/tmp/temporario_XXXXXX.png")
 
-    if xfce4-screenshooter -rc -s "$temp_file" 2>/dev/null; then
-        if [[ -s "$temp_file" ]]; then
-            local novo_arquivo="${destino}/captura_de_tela_${agora}.png"
-            mv "$temp_file" "$novo_arquivo" && {
-                zenity --notification --timeout=1 --text="✅ Captura salva em:\n${novo_arquivo}"
-            }
-        fi
+    xfce4-screenshooter -rc -s "$temp_file" 2>/dev/null || {
+        rm -f "$temp_file"
+        notify-send -t 1500 -i dialog-error "Captura Cancelada" "Operação interrompida"
+        return 0
+    }
+    if [[ -s "$temp_file" ]]; then
+        local novo_arquivo="${destino}/captura_de_tela_${agora}.png"
+        mv "$temp_file" "$novo_arquivo" && {
+            notify-send -t 1500 -i camera-photo "Captura de Tela" "Salva em:\n${novo_arquivo}"
+        }
     else
         rm -f "$temp_file"
-        zenity --error --title="Captura Cancelada" --text="❌ Nenhuma região foi selecionada." --timeout=1
+        notify-send -t 1500 -i dialog-error "Captura Cancelada" "Nenhuma região selecionada"
     fi
 }
 

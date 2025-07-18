@@ -15,11 +15,9 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2025_07_16_20_53_23
+# 2025_07_17_21_52_20
 #
-# =================================================⚡
 # CONFIGURAÇÃO DE CORES
-# =================================================⚡
 COLOR_HEADER="\e[104m"
 COLOR_SUCCESS="\e[1;32m"
 COLOR_WARNING="\e[0;35m"
@@ -27,7 +25,6 @@ COLOR_ERROR="\e[1;31m"
 COLOR_INFO="\e[1;36m"
 COLOR_RESET="\033[0m"
 
-# =================================================⚡
 xtdc_ppa() {
     local PPAS=(
         afelinczak/ppa
@@ -58,7 +55,6 @@ xtdc_ppa() {
     echo "✔ Concluído!"
 }
 
-# =================================================⚡
 xtdc_pkg() {
     declare -a PKGS=(
         baobab
@@ -168,43 +164,42 @@ xtdc_pkg() {
     printf "\n${COLOR_SUCCESS}✔ Instalação concluída com sucesso${COLOR_RESET}\n"
 }
 
-# =================================================⚡
 xtdc_limpeza() {
     declare -a PACOTES_REMOVER=(
-        snapd
-        gnome-software-plugin-snap
-        libreoffice-*
-        gnome-mahjongg
-        gnome-sudoku
-        gnome-mines
         aisleriot
-        bluetooth
-        bluez*
-        cups
-        cups-browsed
-        printer-driver-*
-        zeitgeist*
         apport
         apport-symptoms
-        thunderbird
+        bluetooth
+        bluez*
         cheese
+        cups
+        cups-browsed
         deja-dup
         duplicity
         gnome-characters
         gnome-font-viewer
         gnome-initial-setup
         gnome-logs
+        gnome-mahjongg
+        gnome-mines
         gnome-online-accounts
         gnome-software-plugin-snap
+        gnome-software-plugin-snap
+        gnome-sudoku
+        libreoffice-*
         openvpn*
+        printer-driver-*
         remmina
         rhythmbox
-        totem
         shotwell
+        snapd
+        thunderbird
+        totem
         ubuntu-docs
         usb-creator-gtk
         yelp
         yelp-xsl
+        zeitgeist*
     )
     printf "${COLOR_HEADER}⚡ LIMPEZA DO SISTEMA ⚡${COLOR_RESET}\n\n"
     printf "➔ Atualizando lista de pacotes... "
@@ -252,7 +247,6 @@ xtdc_limpeza() {
     printf "${COLOR_WARNING}⚠ Recomenda-se reiniciar o sistema.${COLOR_RESET}\n"
 }
 
-# =================================================⚡
 xtdc_tema() {
     local LIGHTDM_CONF_DIR="/usr/share/lightdm/lightdm-gtk-greeter.conf.d"
     printf "\n${COLOR_HEADER}⚡ CONFIGURANDO TEMA ⚡${COLOR_RESET}\n"
@@ -307,7 +301,6 @@ EOF
     printf "\n${COLOR_SUCCESS}✔ Configuração de tema concluída${COLOR_RESET}\n"
 }
 
-# =================================================⚡
 xtdc_install_libreoffice_appimage() {
     local LO_URL="https://appimages.libreitalia.org/LibreOffice-fresh.standard-x86_64.AppImage"
     local LO_FILENAME="LibreOffice-fresh.standard-x86_64.AppImage"
@@ -373,7 +366,6 @@ EOL
     echo "LibreOffice AppImage instalado em: $INSTALL_DIR/$LO_FILENAME"
 }
 
-# =================================================⚡
 xtdc_install_gimp_appimage() {
     local GIMP_URL="https://edgeuno-bog2.mm.fcix.net/gimp/gimp/v3.0/linux/GIMP-3.0.4-x86_64.AppImage"
     local GIMP_FILENAME="GIMP-3.0.4-x86_64.AppImage"
