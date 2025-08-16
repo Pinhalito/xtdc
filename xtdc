@@ -15,7 +15,7 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2025_07_17_21_52_20
+# 2025_08_16_18_55_06
 #
 # =================================================⚡
 # CONFIGURAÇÃO DE CORES
@@ -54,7 +54,7 @@ xtdc_norma(){
 # =================================================⚡
 xtdc_printa() {
     local agora=$(date +%Y_%m_%d_%H_%M_%S)
-    local destino="/mnt/UM/IMAGENS/PRINTS"
+    local destino="~/Imagens/"
     mkdir -p "$destino"
     local temp_file=$(mktemp "/tmp/temporario_XXXXXX.png")
 
