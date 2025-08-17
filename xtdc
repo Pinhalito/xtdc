@@ -54,7 +54,7 @@ xtdc_norma(){
 # =================================================⚡
 xtdc_printa() {
     local agora=$(date +%Y_%m_%d_%H_%M_%S)
-    local destino="~/Imagens/"
+    local destino="${HOME}/Imagens/PRINTS/"
     mkdir -p "$destino"
     local temp_file=$(mktemp "/tmp/temporario_XXXXXX.png")
 
