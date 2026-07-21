@@ -6,7 +6,7 @@
 #   |):::(| |):::(|   #
 # ====" "=====" "==== #
 #         TdC         #
-#      1998-2025      #
+#      1998-2026      #
 #######################
 #
 # Toca das Corujas
@@ -15,17 +15,8 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2025_08_16_18_55_06
-#
-# =================================================⚡
-# CONFIGURAÇÃO DE CORES
-# =================================================⚡
-COLOR_HEADER="\e[104m"
-COLOR_SUCCESS="\e[1;32m"
-COLOR_WARNING="\e[0;35m"
-COLOR_ERROR="\e[1;31m"
-COLOR_INFO="\e[1;36m"
-COLOR_RESET="\033[0m"
+# 2026_07_15_16_51_43
+
 
 xtdc_carga() {
 if [ -f /bin/xtdc ]; then
@@ -34,27 +25,17 @@ notify-send -t 3000 -i dialog-information "XTDC" "Funções carregadas em: $(dat
 fi
 }
 
-xtdc_teste(){
-	echo "TESTE5"
-}
 
-# Função: xtdc_norma
-# Descrição: Normaliza o volume de um arquivo de mídia e converte para AAC
-# Uso: xtdc_norma arquivo.mp4
 xtdc_norma(){
     local nome=${1::-4}
     ffmpeg-normalize "$1" -c:a aac -b:a 192k -o "${nome}alto.mp4"
     rm -rf "$1"
 }
 
-# =================================================⚡
-# Função: xtdc_printa
-# Descrição: Captura uma região da tela, salva em um arquivo com data/hora e copia para o clipboard
-# Uso: xtdc_printa
-# =================================================⚡
+
 xtdc_printa() {
     local agora=$(date +%Y_%m_%d_%H_%M_%S)
-    local destino="${HOME}/Imagens/PRINTS/"
+    local destino="${HOME}/Imagens/PRINTS"
     mkdir -p "$destino"
     local temp_file=$(mktemp "/tmp/temporario_XXXXXX.png")
 
@@ -74,96 +55,38 @@ xtdc_printa() {
     fi
 }
 
-# =================================================⚡
-# Função: xtdc_update
-# Descrição: Auto-atualiza o script a partir do GitHub
-# Uso: xtdc_update
-# =================================================⚡
-xtdc_update() {
-    local github_url="https://raw.githubusercontent.com/Pinhalito/xtdc25/main/xtdc"
-    local temp_file=$(mktemp /tmp/xtdc_update.XXXXXX)
-    local installed_script="/bin/xtdc"
 
-    echo -e "${COLOR_INFO}🔍 Baixando atualização do GitHub...${COLOR_RESET}"
+xtdc_hist(){
+strings -n 4 ~/.local/share/clipit/history > "$HOME/Documentos/historicos/$(date +'%Y_%m_%d_%H_%M_%S')_historico.txt"
 
-    # Baixa a versão mais recente
-    if ! wget -q "$github_url" -O "$temp_file"; then
-        echo -e "${COLOR_ERROR}❌ Falha ao baixar a nova versão${COLOR_RESET}"
-        rm -f "$temp_file"
-        return 1
-    fi
+cp ~/.bash_history "$HOME/Documentos/historicos/$(date +'%Y_%m_%d_%H_%M_%S')_bash_history.txt"
 
-    # Substitui o arquivo local
-    if sudo cp "$temp_file" "$installed_script" && sudo chmod +x "$installed_script"; then
-        echo -e "${COLOR_SUCCESS}✅ Script atualizado para a versão mais recente!${COLOR_RESET}"
-    else
-        echo -e "${COLOR_ERROR}❌ Falha ao instalar a nova versão (verifique permissões)${COLOR_RESET}"
-        rm -f "$temp_file"
-        return 1
-    fi
+journalctl -b 0 > "$HOME/Documentos/historicos/$(date +'%Y_%m_%d_%H_%M_%S')_boot.txt"
+journalctl -b 0 -p 3 --no-pager > "$HOME/Documentos/historicos/$(date +'%Y_%m_%d_%H_%M_%S')_apenas_erros.txt"
+}
 
-    rm -f "$temp_file"
+
+xtdc_terminalnotopo(){
+	xfce4-terminal &
+
+for i in $(seq 1 100); do
+  ID=$(wmctrl pip3 -lx | grep -i 'xfce4-terminal\.xfce4-terminal' | awk '{print $1; exit}')
+  [ -n "$ID" ] && wmctrl pip3 -i -r "$ID" -b add,above && exit 0
+  sleep 0.1
+done
+
+}
+
+
+xtdc_calculadoranotopo(){
+	speedcrunch & for i in $(seq 1 50); do ID=$(wmctrl pip3 -l | grep -i speedcrunch | awk '{print $1; exit}'); [ -n "$ID" ] && wmctrl pip3 -i -r "$ID" -b add,above && exit 0; sleep 0.1; done
+# gnome-system-monitor
 }
 
 # =================================================⚡
-# Função: xtdc_extrair_legenda
-# Descrição: Extrai a legenda de um arquivo mkv
-# Uso: xtdc_extrair_legenda arquivo.mkv
+# ===============FIM DOS MAIS USADOS===============⚡
 # =================================================⚡
-xtdc_extrair_legenda() {
-    arquivo="$1"
-    [ -f "$arquivo" ] || { echo "Arquivo não encontrado: $arquivo"; return 1; }
-    base="${arquivo%.mkv}"
-    echo "Extraindo legenda de: $arquivo"
-    mkvextract tracks "$arquivo" 2:"$base.srt"
-}
 
-# =================================================⚡
-# Função: xtdc_embaralha
-# Descrição: Embaralha uma string
-# Uso: xtdc_embaralha STRING
-# =================================================⚡
-# Função para embaralhar
-xtdc_embaralha() {
-    echo -n "Digite a senha para embaralhar: "
-    read -s senha
-    echo
-    
-    # Gera o texto embaralhado
-    texto_embaralhado=$(openssl enc -aes-256-cbc -a -A -salt -pass pass:"$senha" <<< "$1" 2>/dev/null)
-    
-    # Copia para o ClipIt corretamente
-    echo -n "$texto_embaralhado" | xclip -selection clipboard
-    
-    # Verifica se foi copiado
-    if [ "$(xclip -o -selection clipboard)" = "$texto_embaralhado" ]; then
-        echo "✅ String embaralhada copiada para o clipboard!"
-    else
-        echo "❌ Falha ao copiar para o clipboard"
-        echo "Texto embaralhado: $texto_embaralhado"
-    fi
-}
-
-# =================================================⚡
-# Função: xtdc_desembaralha
-# Descrição: Desembaralha uma string
-# Uso: xtdc_desembaralha STRING
-# =================================================⚡
-# Função para desembaralhar
-xtdc_desembaralha() {
-    echo -n "Digite a senha para desembaralhar: "
-    read -s senha
-    echo
-    
-    openssl enc -aes-256-cbc -a -d -A -salt -pass pass:"$senha" <<< "$1" 2>/dev/null || echo "❌ Senha incorreta!"
-}
-
-# =================================================⚡
-xtdc_senha_de_sempre() {
-	desembaralha U2FsdGVkX19QKHP8C3kiSjD19OJAZHKaE/D0PPzyg3uHU2R1dv0ad27Kvtp2T5OYSPWq5+b7R5qNQYaaR2/I0Yip+NT4hTbO/FoMOEPRV4uEo1B6aeQxERclHK8mBg9o4XyqTXPRbj0uyy0e94vs1A==
-    desembaralha U2FsdGVkX1/VJICs1wTvNZAIiVnTDZL5IDEPb4r7qVn4ZKczhJGBOUW9xL2F6UpfUe9ojkUyHNQr50DCMEzxBs3Os9gNd6luCgLyJgfCNmpUiLOOW/Zy+GHaN4rAGdt8G3wO/+deYxEMNiCeeGUknQ==
-    desembaralha U2FsdGVkX1+BjPOu2mSNJl2RTkaZV3fwRv4xw5mAT4IwT/CDZ8X7lfSBQhO7zzc/PPcAKZXEt83z7PESZlm9SCPCtur5PX0ObpEbbzN6Fpjm2+JPmhq8Xdp2/30km9k3AFngT/jFvtmghnoL4ujvZg==
-}
 
 
 xtdc_bkp_enhanced() {
@@ -187,7 +110,6 @@ xtdc_bkp_enhanced() {
     echo "✅ Backup criado: $backup_file ($(du -h "$backup_file" | cut -f1))"
 }
 
-# =================================================⚡
 xtdc_bkp() {
 DIRETORIOS=(
         "/etc/skel"
@@ -263,9 +185,11 @@ xtdc_update_from_tar() {
     echo "✅ Atualização concluída!"
 }
 
-# Últimas imagens abertas
-# grep -oP 'href="file://.*\.(png|jpg|jpeg)"' ~/.local/share/recently-used.xbel
 xtdc_last() {
+# Últimas imagens abertas
+# grep -oP 'href="file://.*\.(png|jpg|jpeg)"' ~/.local/share/recently-used.xbel	
+	
+	
 echo "=== IMAGENS (MAIS RECENTES PRIMEIRO) ==="
 tac ~/.local/share/recently-used.xbel | grep -oP 'href="file://\K[^"]*\.(png|jpg|jpeg|gif|bmp|svg|webp)(?=")' | awk '!seen[$0]++'
 
@@ -287,32 +211,6 @@ tac ~/.local/share/recently-used.xbel | grep -A 2 -P 'href="file://.*\.(mp4|mkv)
 
 }
 
-
-
-xtdc_list_unique_mimetypes() {
-    local dir="$1"
-    declare -A mime_types  # Usamos um array associativo para evitar duplicatas
-
-    if [[ ! -d "$dir" ]]; then
-        echo "Erro: Diretório '$dir' não existe." >&2
-        return 1
-    fi
-
-    # Processa cada arquivo no diretório
-    for file in "$dir"/*; do
-        if [[ -f "$file" ]]; then
-            mimetype=$(xdg-mime query filetype "$file" 2>/dev/null)
-            if [[ -n "$mimetype" ]]; then
-                mime_types["$mimetype"]=1  # Armazena no array (chaves únicas)
-            fi
-        fi
-    done
-
-    # Imprime os resultados únicos
-    printf "%s\n" "${!mime_types[@]}" | sort
-}
-
-
 xtdc_lista_arquivos() {
     cd "$1/.." || exit  # Sobe um nível
     NOME_PASTA=$(basename "$1")
@@ -321,51 +219,7 @@ xtdc_lista_arquivos() {
     xfce4-terminal -e "cat ${NOME_PASTA}_listadearquivos_${DATA}.txt"
 }
 
-
-xtdc_zipa() {
-# Verifica se o diretório foi passado como argumento
-if [ -z "$1" ]; then
-    notify-send "Erro" "Nenhum diretório selecionado."
-    exit 1
-fi
-
-# Obtém o nome do diretório sem o caminho completo
-NOME_PASTA=$(basename "$1")
-CAMINHO_PASTA=$(dirname "$1")
-ARQUIVO_TAR="$CAMINHO_PASTA/$NOME_PASTA.tar.gz"
-ARQUIVO_TAR_TEMP="$CAMINHO_PASTA/$NOME_PASTA.tar.gz.temp"
-
-# Verifica se o arquivo tar.gz já existe
-if [ -f "$ARQUIVO_TAR" ]; then
-    # Modo incremental - extrai, atualiza e compacta novamente
-    #notify-send "Compactação Incremental" "Atualizando $NOME_PASTA.tar.gz com arquivos novos/modificados..."
-    
-    # 1. Descompacta o arquivo existente para uma pasta temporária
-    TEMP_DIR=$(mktemp -d)
-    tar -xzf "$ARQUIVO_TAR" -C "$TEMP_DIR"
-    
-    # 2. Atualiza os arquivos na pasta temporária com os mais recentes
-    rsync -a --update "$1/" "$TEMP_DIR/$NOME_PASTA/"
-    
-    # 3. Cria um novo arquivo tar.gz com o conteúdo atualizado
-    tar -czf "$ARQUIVO_TAR_TEMP" -C "$TEMP_DIR" "$NOME_PASTA"
-    
-    # 4. Substitui o arquivo antigo pelo novo
-    mv "$ARQUIVO_TAR_TEMP" "$ARQUIVO_TAR"
-    
-    # 5. Limpa a pasta temporária
-    rm -rf "$TEMP_DIR"
-else
-    # Cria um novo arquivo compactado
-  #  notify-send "Compactação" "Criando novo arquivo $NOME_PASTA.tar.gz..."
-    tar -czf "$ARQUIVO_TAR" -C "$CAMINHO_PASTA" "$NOME_PASTA"
-fi
-
-notify-send "Concluído" "Operação de compactação finalizada para $NOME_PASTA"
-}
-
-
-xtdc_last() {
+xtdc_last3() {
 	find ./ -type f -printf '%T@ %p\n' | sort -n | tail -n 10 | cut -d' ' -f2-
 }
 
@@ -374,3 +228,5 @@ xtdc_last() {
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     "$@"
 fi
+
+
