@@ -138,7 +138,7 @@ fi
 # Atualizações iniciais
 apt update 
 apt upgrade 
-
+apt install -y curl > /dev/null 2>&1
 
 xtdc_ppa() {
     echo "▶ Instalando PPAs..."
@@ -162,10 +162,6 @@ xtdc_ppa() {
     echo "✔ Concluído!"
 }
 
-xtdc_chrome() {
-
-}
-
 xtdc_pkg() {
     printf "${COLOR_HEADER}⚡ INSTALANDO PACOTES E APLICATIVOS ⚡${COLOR_RESET}\n\n"
 
@@ -173,7 +169,7 @@ xtdc_pkg() {
     if apt-get update -qq; then
         printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
     else
-        printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
+        printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         return 1
     fi
 
@@ -196,7 +192,7 @@ xtdc_pkg() {
         if apt-get install -y --no-install-recommends "${to_install[@]}" >/dev/null 2>&1; then
             printf "  ✔ ${COLOR_SUCCESS}Pacotes instalados com sucesso${COLOR_RESET}\n"
         else
-            printf "  ✖ ${COLOR_ERROR}Erro na instalação de alguns pacotes${COLOR_RESET}\n"
+            printf "  💩 ${COLOR_ERROR}Erro na instalação de alguns pacotes${COLOR_RESET}\n"
         fi
     else
         printf "  ✔ ${COLOR_INFO}Todos os pacotes já estão instalados${COLOR_RESET}\n"
@@ -217,7 +213,7 @@ xtdc_pkg() {
         && apt install -y google-chrome-stable >/dev/null 2>&1; then
             printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
         else
-            printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
+            printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         fi
     else
         printf "${COLOR_INFO}JÁ INSTALADO${COLOR_RESET}\n"
@@ -234,7 +230,7 @@ xtdc_pkg() {
             > "${CHROME_EXT_DIR}/${ext_id}.json"; then
             printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
         else
-            printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
+            printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         fi
     done
 
@@ -245,7 +241,7 @@ xtdc_pkg() {
         if curl -fsSL https://rclone.org/install.sh | bash >/dev/null 2>&1; then
             printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
         else
-            printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
+            printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         fi
     else
         printf "${COLOR_INFO}JÁ INSTALADO${COLOR_RESET}\n"
@@ -257,7 +253,7 @@ xtdc_pkg() {
         if curl -fsSL https://dl.brave.com/install.sh | bash >/dev/null 2>&1; then
             printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
         else
-            printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
+            printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         fi
     else
         printf "${COLOR_INFO}JÁ INSTALADO${COLOR_RESET}\n"
@@ -272,7 +268,7 @@ xtdc_pkg() {
             > "${BRAVE_EXT_DIR}/${ext_id}.json" 2>/dev/null; then
             printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
         else
-            printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
+            printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         fi
     done
 
@@ -286,18 +282,18 @@ xtdc_install_libreoffice_appimage() {
     fi
 
     mkdir -p -m 755 "$INSTALL_DIR" || {
-        echo "Erro ao criar diretório $INSTALL_DIR"
+        echo "💩 Erro ao criar diretório $INSTALL_DIR"
         return 1
     }
 
     echo "Baixando LibreOffice AppImage..."
     wget -q --show-progress -O "$INSTALL_DIR/$LO_FILENAME" "$LO_URL" || {
-        echo "Erro ao baixar o arquivo"
+        echo "💩 Erro ao baixar o arquivo"
         return 1
     }
 
     chmod +x "$INSTALL_DIR/$LO_FILENAME" || {
-        echo "Erro ao tornar o AppImage executável"
+        echo "💩 Erro ao tornar o AppImage executável"
         return 1
     }
 
@@ -316,7 +312,7 @@ StartupNotify=true
 EOL
 
     update-desktop-database || {
-        echo "Erro ao atualizar o banco de dados de desktop"
+        echo "💩 Erro ao atualizar o banco de dados de desktop"
         return 1
     }
 
@@ -332,7 +328,7 @@ EOL
 
     for mime in "${MIME_TYPES[@]}"; do
         xdg-mime default libreoffice-appimage.desktop "$mime" || {
-            echo "Erro ao configurar padrão para $mime"
+            echo "💩 Erro ao configurar padrão para $mime"
         }
     done
 
@@ -366,17 +362,15 @@ EOF
             chmod 644 "${LIGHTDM_CONF_DIR}"/*.conf 2>/dev/null
             printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
         } || {
-            printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
+            printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
             return 1
         }
     fi
 }
 
 xtdc_download() {
-    apt install -y curl > /dev/null 2>&1
-
     mkdir -p -m 755 "$DOWNLOAD_DIR" || {
-        printf "${COLOR_ERROR}✖ Falha ao criar diretório ${DOWNLOAD_DIR}${COLOR_RESET}\n"
+        printf "${COLOR_ERROR}💩 Falha ao criar diretório ${DOWNLOAD_DIR}${COLOR_RESET}\n"
         return 1
     }
 
@@ -384,7 +378,7 @@ xtdc_download() {
     for file in "${FILE_LIST[@]}"; do
         printf "${COLOR_INFO}➔ Baixando ${file}...${COLOR_RESET}\n"
         curl -sL "${GH_URL}/${file}" -o "${DOWNLOAD_DIR}/${file}" || {
-            printf "${COLOR_ERROR}✖ Falha no download de ${file}${COLOR_RESET}\n"
+            printf "${COLOR_ERROR}💩 Falha no download de ${file}${COLOR_RESET}\n"
             continue
         }
         printf "${COLOR_SUCCESS}✔ ${file} baixado com sucesso${COLOR_RESET}\n"
@@ -399,7 +393,7 @@ xtdc_install() {
 
     for file in "${REQUIRED_FILES[@]}"; do
         if [ ! -f "${DOWNLOAD_DIR}/${file}" ]; then
-            printf "${COLOR_ERROR}✖ Arquivo ${file} não encontrado em ${DOWNLOAD_DIR}${COLOR_RESET}\n"
+            printf "${COLOR_ERROR}💩 Arquivo ${file} não encontrado em ${DOWNLOAD_DIR}${COLOR_RESET}\n"
             printf "${COLOR_INFO}Execute xtdc_download primeiro para baixar os arquivos.${COLOR_RESET}\n"
             return 1
         fi
@@ -407,30 +401,30 @@ xtdc_install() {
 
     printf "${COLOR_INFO}➔ Instalando ícones...${COLOR_RESET}\n"
     tar -xzf "${DOWNLOAD_DIR}/xtdc_icons.tar.gz" -C /usr/share/icons/ || {
-        printf "${COLOR_ERROR}✖ Falha ao descompactar ícones${COLOR_RESET}\n"
+        printf "${COLOR_ERROR}💩 Falha ao descompactar ícones${COLOR_RESET}\n"
         return 1
     }
 
     printf "${COLOR_INFO}➔ Instalando temas...${COLOR_RESET}\n"
     tar -xzf "${DOWNLOAD_DIR}/xtdc_theme.tar.gz" -C /usr/share/themes/ || {
-        printf "${COLOR_ERROR}✖ Falha ao descompactar temas${COLOR_RESET}\n"
+        printf "${COLOR_ERROR}💩 Falha ao descompactar temas${COLOR_RESET}\n"
         return 1
     }
 
     printf "${COLOR_INFO}➔ Instalando fontes...${COLOR_RESET}\n"
     tar -xzf "${DOWNLOAD_DIR}/xtdc_ttf.tar.gz" -C /usr/share/fonts/truetype/ || {
-        printf "${COLOR_ERROR}✖ Falha ao descompactar fontes${COLOR_RESET}\n"
+        printf "${COLOR_ERROR}💩 Falha ao descompactar fontes${COLOR_RESET}\n"
         return 1
     }
 
     printf "${COLOR_INFO}➔ Instalando executável...${COLOR_RESET}\n"
     mv "${DOWNLOAD_DIR}/xtdc" /bin/ || {
-        printf "${COLOR_ERROR}✖ Falha ao mover o executável${COLOR_RESET}\n"
+        printf "${COLOR_ERROR}💩 Falha ao mover o executável${COLOR_RESET}\n"
         return 1
     }
 
     chmod 755 /bin/xtdc || {
-        printf "${COLOR_ERROR}✖ Falha ao definir permissões do executável${COLOR_RESET}\n"
+        printf "${COLOR_ERROR}💩 Falha ao definir permissões do executável${COLOR_RESET}\n"
         return 1
     }
 
@@ -453,7 +447,7 @@ xtdc_limpeza() {
     printf "${COLOR_HEADER}⚡ LIMPEZA DO SISTEMA ⚡${COLOR_RESET}\n\n"
 
     if ! command -v apt-get &>/dev/null || ! command -v dpkg &>/dev/null; then
-        printf "${COLOR_ERROR}✖ Erro: Sistema de pacotes não encontrado${COLOR_RESET}\n"
+        printf "${COLOR_ERROR}💩 Erro: Sistema de pacotes não encontrado${COLOR_RESET}\n"
         return 1
     fi
 
@@ -461,7 +455,7 @@ xtdc_limpeza() {
     if apt-get update -qq &>/dev/null; then
         printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
     else
-        printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
+        printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         return 1
     fi
 
@@ -487,7 +481,7 @@ xtdc_limpeza() {
             rm -rf /snap /var/snap /var/lib/snapd ~/snap &>/dev/null
             printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
         else
-            printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
+            printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         fi
     fi
 
@@ -497,7 +491,7 @@ xtdc_limpeza() {
     if apt-get autoremove -y --purge &>/dev/null; then
         printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
     else
-        printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
+        printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
     fi
 
     printf "➔ Limpando cache... "
@@ -510,7 +504,6 @@ xtdc_limpeza() {
 
     rm -rf /usr/share/fonts/truetype/tlwg
 }
-
 
 xtdc_roda(){
 # Criação do arquivo de log
@@ -527,15 +520,13 @@ chmod 644 "$LOG_FILE"
 printf "${COLOR_HEADER}🚀 Iniciando Automação XTDC...${COLOR_RESET}\n"
 xtdc_ppa
 xtdc_pkg
-xtdc_chrome
 xtdc_download
 xtdc_install
-xtdc_install_libreoffice_appimage
+#xtdc_install_libreoffice_appimage
 xtdc_tema
 xtdc_limpeza
 printf "${COLOR_SUCCESS}🎉 Todo o processo foi concluído. Log salvo em: $LOG_FILE${COLOR_RESET}\n"
 printf "${COLOR_WARNING}⚠ Recomenda-se reiniciar o sistema.${COLOR_RESET}\n"
 }
-
 
 # FIM
