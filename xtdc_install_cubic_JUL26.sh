@@ -57,6 +57,7 @@ xtdc_vars() {
     declare -A CHROME_EXT=(
         ["ponfpcnoihfmfllpaingbgckeeldkhle"]="Enhancer for YouTube™"
         ["mnjggcdmjocbbbhaepdhchncahnbgone"]="SponsorBlock para YouTube"
+        ["cfhdojbkjhnklbpkdaibdccddilifddb"]="AdBlock Plus"
         ["aapbdbdomjkkjkaonfhkkikfgjllcleb"]="Google Tradutor"
         ["gbkeegbaiigmenfmjfclcdgdpimamgkj"]="Editor do Office"
     )
