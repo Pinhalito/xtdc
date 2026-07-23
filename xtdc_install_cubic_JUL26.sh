@@ -15,10 +15,9 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2026_07_21_21_31_34
+# 2026_07_22_22_00_59
 
 xtdc_vars() {
-    # Definição de cores
     COLOR_HEADER='\033[1;36m'
     COLOR_SUCCESS='\033[1;32m'
     COLOR_ERROR='\033[1;31m'
@@ -38,7 +37,6 @@ xtdc_vars() {
         kisak/kisak-mesa
     )
 
-    # Pacotes
     PKGS=(
         rclone-browser transmission
         smplayer simplescreenrecorder
@@ -57,7 +55,6 @@ xtdc_vars() {
     declare -A CHROME_EXT=(
         ["ponfpcnoihfmfllpaingbgckeeldkhle"]="Enhancer for YouTube™"
         ["mnjggcdmjocbbbhaepdhchncahnbgone"]="SponsorBlock para YouTube"
-        ["cfhdojbkjhnklbpkdaibdccddilifddb"]="AdBlock Plus"
         ["aapbdbdomjkkjkaonfhkkikfgjllcleb"]="Google Tradutor"
         ["gbkeegbaiigmenfmjfclcdgdpimamgkj"]="Editor do Office"
     )
@@ -126,23 +123,13 @@ xtdc_vars() {
         language-pack-zh-hans-base
     )
 }
-
-# Inicializa variáveis globais
 xtdc_vars
 
-# Garante que o script está rodando como root
-if [[ $EUID -ne 0 ]]; then
-   echo -e "\033[1;31mEste script precisa ser executado como ROOT (sudo).\033[0m"
-   exit 1
-fi
-
-# Atualizações iniciais
 apt update 
-apt upgrade 
 apt install -y curl > /dev/null 2>&1
 
 xtdc_ppa() {
-    echo "▶ Instalando PPAs..."
+    echo "▶️ Instalando PPAs..."
     local needs_update=0
 
     for ppa in "${PPAS[@]}"; do
@@ -152,29 +139,29 @@ xtdc_ppa() {
                 echo "OK"
                 needs_update=1
             else
-                echo "FALHOU"
+                echo "💩FALHOU"
             fi
         else
-            echo "JÁ INSTALADO"
+            echo "👍JÁ INSTALADO"
         fi
     done
 
     [ "$needs_update" -eq 1 ] && apt-get update -qq
-    echo "✔ Concluído!"
+    echo "✅ Concluído!"
 }
 
 xtdc_pkg() {
     printf "${COLOR_HEADER}⚡ INSTALANDO PACOTES E APLICATIVOS ⚡${COLOR_RESET}\n\n"
 
-    printf "➔ Atualizando repositórios... "
+    printf "▶️ Atualizando repositórios... "
     if apt-get update -qq; then
-        printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+        printf "${COLOR_SUCCESS}👍OK${COLOR_RESET}\n"
     else
         printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         return 1
     fi
 
-    printf "\n➔ VERIFICANDO PACOTES DO REPOSITÓRIO\n"
+    printf "\n▶️ VERIFICANDO PACOTES DO REPOSITÓRIO\n"
 
     local -a installed_pkgs
     local -a to_install
@@ -188,22 +175,22 @@ xtdc_pkg() {
     done
 
     if [ ${#to_install[@]} -gt 0 ]; then
-        printf "\n➔ INSTALANDO %d PACOTES\n" "${#to_install[@]}"
+        printf "\n▶️ INSTALANDO %d PACOTES\n" "${#to_install[@]}"
 
         if apt-get install -y --no-install-recommends "${to_install[@]}" >/dev/null 2>&1; then
-            printf "  ✔ ${COLOR_SUCCESS}Pacotes instalados com sucesso${COLOR_RESET}\n"
+            printf "  ✅ ${COLOR_SUCCESS}Pacotes instalados com sucesso${COLOR_RESET}\n"
         else
             printf "  💩 ${COLOR_ERROR}Erro na instalação de alguns pacotes${COLOR_RESET}\n"
         fi
     else
-        printf "  ✔ ${COLOR_INFO}Todos os pacotes já estão instalados${COLOR_RESET}\n"
+        printf "  ✅ ${COLOR_INFO}Todos os pacotes já estão instalados${COLOR_RESET}\n"
     fi
 
-    printf "\n➔ APLICATIVOS EXTERNOS\n"
+    printf "\n▶️ APLICATIVOS EXTERNOS\n"
 
     printf "${COLOR_HEADER}⚡ INSTALANDO GOOGLE CHROME ⚡${COLOR_RESET}\n\n"
 
-    printf "  ➔ Google Chrome... "
+    printf "  ▶️ Google Chrome... "
     if ! [ -x /usr/bin/google-chrome ] && ! [ -x /opt/google/chrome/google-chrome ]; then
         if curl -fsSL https://dl.google.com/linux/linux_signing_key.pub \
             | gpg --dearmor \
@@ -212,71 +199,91 @@ xtdc_pkg() {
             | tee /etc/apt/sources.list.d/google-chrome.list >/dev/null \
         && apt update -qq >/dev/null \
         && apt install -y google-chrome-stable >/dev/null 2>&1; then
-            printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+            printf "${COLOR_SUCCESS}👍OK${COLOR_RESET}\n"
         else
             printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         fi
     else
-        printf "${COLOR_INFO}JÁ INSTALADO${COLOR_RESET}\n"
+        printf "${COLOR_INFO}👍JÁ INSTALADO${COLOR_RESET}\n"
     fi
 
-    printf "\n➔ EXTENSÕES DO GOOGLE CHROME\n"
+    printf "\n▶️ EXTENSÕES DO GOOGLE CHROME\n"
 
     mkdir -p -m 755 "$CHROME_EXT_DIR"
 
     for ext_id in "${!CHROME_EXT[@]}"; do
-        printf "  ➔ ${CHROME_EXT[$ext_id]}... "
+        printf "  ▶️ ${CHROME_EXT[$ext_id]}... "
 
         if echo '{ "external_update_url": "https://clients2.google.com/service/update2/crx" }' \
             > "${CHROME_EXT_DIR}/${ext_id}.json"; then
-            printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+            printf "${COLOR_SUCCESS}👍OK${COLOR_RESET}\n"
         else
             printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         fi
     done
 
-    printf "\n${COLOR_SUCCESS}✔ Instalação concluída com sucesso${COLOR_RESET}\n"
+    printf "\n${COLOR_SUCCESS}✅ Instalação concluída com sucesso${COLOR_RESET}\n"
 
-    printf "  ➔ Rclone... "
+    printf "  ▶️ Rclone... "
     if ! command -v rclone >/dev/null; then
         if curl -fsSL https://rclone.org/install.sh | bash >/dev/null 2>&1; then
-            printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+            printf "${COLOR_SUCCESS}👍OK${COLOR_RESET}\n"
         else
             printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         fi
     else
-        printf "${COLOR_INFO}JÁ INSTALADO${COLOR_RESET}\n"
+        printf "${COLOR_INFO}👍JÁ INSTALADO${COLOR_RESET}\n"
     fi
 
-    printf "  ➔ Brave Browser... "
+    printf "  ▶️ Brave Browser... "
     if ! command -v brave-browser >/dev/null &&
        ! [ -x /opt/brave.com/brave/brave ]; then
         if curl -fsSL https://dl.brave.com/install.sh | bash >/dev/null 2>&1; then
-            printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+            printf "${COLOR_SUCCESS}👍OK${COLOR_RESET}\n"
         else
             printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         fi
     else
-        printf "${COLOR_INFO}JÁ INSTALADO${COLOR_RESET}\n"
+        printf "${COLOR_INFO}👍JÁ INSTALADO${COLOR_RESET}\n"
     fi
 
-    printf "\n➔ EXTENSÕES DO BRAVE\n"
+    printf "\n▶️ EXTENSÕES DO BRAVE\n"
     mkdir -p -m 755 "$BRAVE_EXT_DIR" 2>/dev/null
 
     for ext_id in "${!BRAVE_EXT[@]}"; do
-        printf "  ➔ ${BRAVE_EXT[$ext_id]}... "
+        printf "  ▶️ ${BRAVE_EXT[$ext_id]}... "
         if echo '{ "external_update_url": "https://clients2.google.com/service/update2/crx" }' \
             > "${BRAVE_EXT_DIR}/${ext_id}.json" 2>/dev/null; then
-            printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+            printf "${COLOR_SUCCESS}👍OK${COLOR_RESET}\n"
         else
             printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         fi
     done
 
-    printf "\n${COLOR_SUCCESS}✔ Instalação concluída com sucesso${COLOR_RESET}\n"
+    printf "\n${COLOR_SUCCESS}✅ Instalação concluída com sucesso${COLOR_RESET}\n"
 }
 
-xtdc_install_libreoffice_appimage() {
+xtdc_download() {
+	    mkdir -p -m 755 "$DOWNLOAD_DIR" || {
+        printf "${COLOR_ERROR}💩 Falha ao criar diretório ${DOWNLOAD_DIR}${COLOR_RESET}\n"
+        return 1
+    }
+
+    printf "${COLOR_HEADER}▶️ Iniciando downloads...${COLOR_RESET}\n"
+    for file in "${FILE_LIST[@]}"; do
+        printf "${COLOR_INFO}▶️ Baixando ${file}...${COLOR_RESET}\n"
+        curl -sL "${GH_URL}/${file}" -o "${DOWNLOAD_DIR}/${file}" || {
+            printf "${COLOR_ERROR}💩 Falha no download de ${file}${COLOR_RESET}\n"
+            continue
+        }
+        printf "${COLOR_SUCCESS}✅ ${file} baixado com sucesso${COLOR_RESET}\n"
+    done
+
+    chmod -R u+rwX,go+rX "$DOWNLOAD_DIR" > /dev/null 2>&1
+    printf "${COLOR_SUCCESS}✅ Downloads concluídos${COLOR_RESET}\n"
+}
+
+xtdc_libreoffice_appimage() {
     if [[ $EUID -ne 0 ]]; then
         echo "Este script precisa ser executado como root"
         return 1
@@ -333,7 +340,7 @@ EOL
         }
     done
 
-    echo "Instalação concluída com sucesso!"
+    echo "👍 Instalação concluída com sucesso!"
     echo "LibreOffice AppImage instalado em: $INSTALL_DIR/$LO_FILENAME"
 }
 
@@ -361,64 +368,48 @@ screensaver-timeout=60
 EOF
 
             chmod 644 "${LIGHTDM_CONF_DIR}"/*.conf 2>/dev/null
-            printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+            printf "${COLOR_SUCCESS}👍OK${COLOR_RESET}\n"
         } || {
             printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
             return 1
         }
     fi
-}
 
-xtdc_download() {
-    mkdir -p -m 755 "$DOWNLOAD_DIR" || {
-        printf "${COLOR_ERROR}💩 Falha ao criar diretório ${DOWNLOAD_DIR}${COLOR_RESET}\n"
-        return 1
-    }
-
-    printf "${COLOR_HEADER}📦 Iniciando downloads...${COLOR_RESET}\n"
-    for file in "${FILE_LIST[@]}"; do
-        printf "${COLOR_INFO}➔ Baixando ${file}...${COLOR_RESET}\n"
-        curl -sL "${GH_URL}/${file}" -o "${DOWNLOAD_DIR}/${file}" || {
-            printf "${COLOR_ERROR}💩 Falha no download de ${file}${COLOR_RESET}\n"
-            continue
-        }
-        printf "${COLOR_SUCCESS}✔ ${file} baixado com sucesso${COLOR_RESET}\n"
-    done
-
-    chmod -R u+rwX,go+rX "$DOWNLOAD_DIR" > /dev/null 2>&1
-    printf "${COLOR_SUCCESS}✅ Downloads concluídos${COLOR_RESET}\n"
-}
-
-xtdc_install() {
-    printf "${COLOR_HEADER}📦 Iniciando instalação...${COLOR_RESET}\n"
+    printf "${COLOR_HEADER}▶️ Iniciando instalação...${COLOR_RESET}\n"
 
     for file in "${REQUIRED_FILES[@]}"; do
         if [ ! -f "${DOWNLOAD_DIR}/${file}" ]; then
             printf "${COLOR_ERROR}💩 Arquivo ${file} não encontrado em ${DOWNLOAD_DIR}${COLOR_RESET}\n"
-            printf "${COLOR_INFO}Execute xtdc_download primeiro para baixar os arquivos.${COLOR_RESET}\n"
+            printf "${COLOR_INFO}✅ Execute xtdc_download primeiro para baixar os arquivos.${COLOR_RESET}\n"
             return 1
         fi
     done
 
-    printf "${COLOR_INFO}➔ Instalando ícones...${COLOR_RESET}\n"
+    printf "${COLOR_INFO}▶️ Instalando skel...${COLOR_RESET}\n"
+    tar -xzf "${DOWNLOAD_DIR}/xtdc_skel.tar.gz" -C /etc/ || {
+        printf "${COLOR_ERROR}💩 Falha ao descompactar skel${COLOR_RESET}\n"
+        return 1
+    }
+
+    printf "${COLOR_INFO}▶️ Instalando ícones...${COLOR_RESET}\n"
     tar -xzf "${DOWNLOAD_DIR}/xtdc_icons.tar.gz" -C /usr/share/icons/ || {
         printf "${COLOR_ERROR}💩 Falha ao descompactar ícones${COLOR_RESET}\n"
         return 1
     }
 
-    printf "${COLOR_INFO}➔ Instalando temas...${COLOR_RESET}\n"
+    printf "${COLOR_INFO}▶️ Instalando temas...${COLOR_RESET}\n"
     tar -xzf "${DOWNLOAD_DIR}/xtdc_theme.tar.gz" -C /usr/share/themes/ || {
         printf "${COLOR_ERROR}💩 Falha ao descompactar temas${COLOR_RESET}\n"
         return 1
     }
 
-    printf "${COLOR_INFO}➔ Instalando fontes...${COLOR_RESET}\n"
+    printf "${COLOR_INFO}▶️ Instalando fontes...${COLOR_RESET}\n"
     tar -xzf "${DOWNLOAD_DIR}/xtdc_ttf.tar.gz" -C /usr/share/fonts/truetype/ || {
         printf "${COLOR_ERROR}💩 Falha ao descompactar fontes${COLOR_RESET}\n"
         return 1
     }
 
-    printf "${COLOR_INFO}➔ Instalando executável...${COLOR_RESET}\n"
+    printf "${COLOR_INFO}▶️ Instalando executável...${COLOR_RESET}\n"
     mv "${DOWNLOAD_DIR}/xtdc" /bin/ || {
         printf "${COLOR_ERROR}💩 Falha ao mover o executável${COLOR_RESET}\n"
         return 1
@@ -430,18 +421,16 @@ xtdc_install() {
     }
 
     if command -v fc-cache >/dev/null 2>&1; then
-        printf "${COLOR_INFO}➔ Atualizando cache de fontes...${COLOR_RESET}\n"
+        printf "${COLOR_INFO}▶️ Atualizando cache de fontes...${COLOR_RESET}\n"
         fc-cache -f > /dev/null 2>&1
     fi
 
     printf "${COLOR_SUCCESS}✅ Instalação concluída com sucesso${COLOR_RESET}\n"
-    printf "${COLOR_INFO}Os seguintes itens foram instalados:\n"
+    printf "${COLOR_INFO}✅Os seguintes itens foram instalados:\n"
     printf "  • Ícones: /usr/share/icons/xtdc_icons e /usr/share/icons/xtdc_svg\n"
     printf "  • Temas: /usr/share/themes/xtdc_theme e /usr/share/themes/xtdc_dark\n"
     printf "  • Fontes: /usr/share/fonts/truetype/xtdc_ttf\n"
     printf "  • Executável: /bin/xtdc (com permissões 755)${COLOR_RESET}\n"
-
-    rm -rf /xtdc/*.tar.gz
 }
 
 xtdc_limpeza() {
@@ -452,9 +441,9 @@ xtdc_limpeza() {
         return 1
     fi
 
-    printf "➔ Atualizando lista de pacotes... "
+    printf "▶️ Atualizando lista de pacotes... "
     if apt-get update -qq &>/dev/null; then
-        printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+        printf "${COLOR_SUCCESS}👍OK${COLOR_RESET}\n"
     else
         printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         return 1
@@ -463,24 +452,24 @@ xtdc_limpeza() {
     printf "\n${COLOR_HEADER}REMOVENDO PACOTES DESNECESSÁRIOS:${COLOR_RESET}\n"
 
     for pkg in "${PACOTES_REMOVER[@]}"; do
-        printf "  ➔ ${pkg%%\*}... "
+        printf "  ▶️ ${pkg%%\*}... "
         if dpkg -l | grep -q "^ii.*${pkg%%\*}"; then
             if apt-get purge -y "$pkg" &>/dev/null; then
-                printf "${COLOR_SUCCESS}REMOVIDO${COLOR_RESET}\n"
+                printf "${COLOR_SUCCESS}✅REMOVIDO${COLOR_RESET}\n"
             else
-                printf "${COLOR_WARNING}FALHOU${COLOR_RESET}\n"
+                printf "${COLOR_WARNING}⚠️FALHOU${COLOR_RESET}\n"
             fi
         else
-            printf "${COLOR_INFO}NÃO INSTALADO${COLOR_RESET}\n"
+            printf "${COLOR_INFO}⚠️NÃO INSTALADO${COLOR_RESET}\n"
         fi
     done
 
     if dpkg -l snapd &>/dev/null; then
-        printf "\n➔ Removendo Snap completamente... "
+        printf "\n▶️ Removendo Snap completamente... "
         systemctl stop snapd.{socket,service} &>/dev/null
         if apt-get purge -y snapd gnome-software-plugin-snap &>/dev/null; then
             rm -rf /snap /var/snap /var/lib/snapd ~/snap &>/dev/null
-            printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+            printf "${COLOR_SUCCESS}👍OK${COLOR_RESET}\n"
         else
             printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
         fi
@@ -488,20 +477,20 @@ xtdc_limpeza() {
 
     printf "\n${COLOR_HEADER}LIMPANDO RESÍDUOS DO SISTEMA:${COLOR_RESET}\n"
 
-    printf "➔ Removendo pacotes órfãos... "
+    printf "▶️ Removendo pacotes órfãos... "
     if apt-get autoremove -y --purge &>/dev/null; then
-        printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+        printf "${COLOR_SUCCESS}👍OK${COLOR_RESET}\n"
     else
         printf "${COLOR_ERROR}💩FALHA${COLOR_RESET}\n"
     fi
 
-    printf "➔ Limpando cache... "
+    printf "▶️ Limpando cache... "
     apt-get clean &>/dev/null
     rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* &>/dev/null
-    printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+    printf "${COLOR_SUCCESS}👍OK${COLOR_RESET}\n"
 
-    printf "\n${COLOR_SUCCESS}✔ Limpeza concluída com sucesso${COLOR_RESET}\n"
-    printf "${COLOR_WARNING}⚠ Recomenda-se reiniciar o sistema.${COLOR_RESET}\n"
+    printf "\n${COLOR_SUCCESS}✅ Limpeza concluída com sucesso${COLOR_RESET}\n"
+    printf "${COLOR_WARNING}⚠️ Recomenda-se reiniciar o sistema.${COLOR_RESET}\n"
 
     rm -rf /usr/share/fonts/truetype/tlwg
 }
@@ -522,12 +511,10 @@ printf "${COLOR_HEADER}🚀 Iniciando Automação XTDC...${COLOR_RESET}\n"
 xtdc_ppa
 xtdc_pkg
 xtdc_download
-xtdc_install
-#xtdc_install_libreoffice_appimage
+xtdc_install_libreoffice_appimage
 xtdc_tema
 xtdc_limpeza
 printf "${COLOR_SUCCESS}🎉 Todo o processo foi concluído. Log salvo em: $LOG_FILE${COLOR_RESET}\n"
-printf "${COLOR_WARNING}⚠ Recomenda-se reiniciar o sistema.${COLOR_RESET}\n"
+printf "${COLOR_WARNING}⚠️️ Recomenda-se reiniciar o sistema.${COLOR_RESET}\n"
 }
-
 # FIM
