@@ -8,6 +8,6 @@ Unidade Barão Geraldo CX
 
 
 Arquivos para personalização da minha instalação\
-Baseado na distro "Xubuntu Core 20.04" da Unit 193
+Baseado na distro "Xubuntu 20.04" 
 
 
