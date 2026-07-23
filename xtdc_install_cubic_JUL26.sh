@@ -15,7 +15,7 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2026_07_22_22_00_59
+# 2026_07_22_23_27_56
 
 xtdc_vars() {
     COLOR_HEADER='\033[1;36m'
@@ -25,7 +25,6 @@ xtdc_vars() {
     COLOR_INFO='\033[1;34m'
     COLOR_RESET='\033[0m'
 
-    # PPAs
     PPAS=(
         afelinczak/ppa
         cubic-wizard/release
@@ -39,10 +38,10 @@ xtdc_vars() {
 
     PKGS=(
         rclone-browser transmission
-        smplayer simplescreenrecorder
+        smplayer simplescreenrecorder kokdi
         eog shotwell 
         baobab clipit file-roller catfish menulibre
-        bleachbit evince geany gnome-disk-utility
+        bleachbit evince geany gnome-disk-utility 
         gnome-system-monitor gnome-system-tools gparted
         p7zip-full rar unrar thunar-archive-plugin
         speedcrunch synaptic tree zenity xclip
@@ -65,11 +64,16 @@ xtdc_vars() {
         ["mnjggcdmjocbbbhaepdhchncahnbgone"]="SponsorBlock para YouTube"
     )
 
-    # LibreOffice AppImage
+    # LibreOffice / Pinta AppImage
+    INSTALL_DIR="/xtdc/appimages"
+    
     LO_URL="https://appimages.libreitalia.org/LibreOffice-still.standard-x86_64.AppImage"
     LO_FILENAME="LibreOffice-still.standard-x86_64.AppImage"
-    INSTALL_DIR="/xtdc/appimages"
-    DESKTOP_FILE="/usr/share/applications/libreoffice-appimage.desktop"
+    LO_DESKTOP_FILE="/usr/share/applications/libreoffice-appimage.desktop"
+    
+    PINTA_URL="https://github.com/pkgforge-dev/Pinta-AppImage/releases/download/3.1.2-1%402026-07-22_1784722273/Pinta-3.1.2-1-anylinux-x86_64.AppImage"
+    PINTA_FILENAME="Pinta-3.1.2-1-anylinux-x86_64.AppImage"
+    PINTA_DESKTOP_FILE="/usr/share/applications/pinta.desktop"
 
     # Tema LightDM
     LIGHTDM_CONF_DIR="/usr/share/lightdm/lightdm-gtk-greeter.conf.d"
@@ -81,6 +85,7 @@ xtdc_vars() {
         "xtdc_icons.tar.gz"
         "xtdc_theme.tar.gz"
         "xtdc_ttf.tar.gz"
+        "xtdc_skel.tar.gz"
         "xtdc"
     )
 
@@ -88,10 +93,10 @@ xtdc_vars() {
         "xtdc_icons.tar.gz"
         "xtdc_theme.tar.gz"
         "xtdc_ttf.tar.gz"
+        "xtdc_skel.tar.gz"
         "xtdc"
     )
 
-    # Pacotes a remover na limpeza
     PACOTES_REMOVER=(
         snapd apport apport-symptoms thunderbird aspell
         "libreoffice-*"
@@ -108,7 +113,7 @@ xtdc_vars() {
         cheese deja-dup duplicity gnome-characters gnome-font-viewer
         gnome-initial-setup gnome-logs gnome-online-accounts
         gnome-software-plugin-snap openvpn remmina rhythmbox
-        totem shotwell ubuntu-docs usb-creator-gtk
+        totem ubuntu-docs usb-creator-gtk
         language-pack-de language-pack-de-base language-pack-en
         language-pack-en-base language-pack-es language-pack-es-base
         language-pack-fr language-pack-fr-base language-pack-gnome-de
@@ -123,10 +128,6 @@ xtdc_vars() {
         language-pack-zh-hans-base
     )
 }
-xtdc_vars
-
-apt update 
-apt install -y curl > /dev/null 2>&1
 
 xtdc_ppa() {
     echo "▶️ Instalando PPAs..."
@@ -283,12 +284,7 @@ xtdc_download() {
     printf "${COLOR_SUCCESS}✅ Downloads concluídos${COLOR_RESET}\n"
 }
 
-xtdc_libreoffice_appimage() {
-    if [[ $EUID -ne 0 ]]; then
-        echo "Este script precisa ser executado como root"
-        return 1
-    fi
-
+xtdc_appimage() {
     mkdir -p -m 755 "$INSTALL_DIR" || {
         echo "💩 Erro ao criar diretório $INSTALL_DIR"
         return 1
@@ -300,13 +296,24 @@ xtdc_libreoffice_appimage() {
         return 1
     }
 
+    echo "Baixando Pinta AppImage..."
+    wget -q --show-progress -O "$INSTALL_DIR/$PINTA_FILENAME" "$PINTA_URL" || {
+        echo "💩 Erro ao baixar o arquivo"
+        return 1
+    }
+
     chmod +x "$INSTALL_DIR/$LO_FILENAME" || {
         echo "💩 Erro ao tornar o AppImage executável"
         return 1
     }
 
-    echo "Criando arquivo .desktop..."
-    cat > "$DESKTOP_FILE" <<'EOL'
+    chmod +x "$INSTALL_DIR/$PINTA_FILENAME" || {
+        echo "💩 Erro ao tornar o AppImage executável"
+        return 1
+    }
+
+    echo "Criando arquivos .desktop..."
+    cat > "$LO_DESKTOP_FILE" <<'EOL'
 [Desktop Entry]
 Type=Application
 Name=LibreOffice
@@ -317,6 +324,22 @@ Terminal=false
 Categories=Office;
 MimeType=application/vnd.openxmlformats-officedocument.wordprocessingml.document;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;application/vnd.openxmlformats-officedocument.presentationml.presentation;application/msword;application/vnd.ms-excel;application/vnd.ms-powerpoint;application/vnd.oasis.opendocument.text;application/vnd.oasis.opendocument.spreadsheet;application/vnd.oasis.opendocument.presentation;
 StartupNotify=true
+EOL
+
+    cat > "$PINTA_DESKTOP_FILE" <<'EOL'
+[Desktop Entry]
+Name=Pinta
+Comment=Editor de bitmap (MS Paint)
+TryExec=pinta
+Exec=pinta %F
+Icon=pinta
+StartupNotify=false
+StartupWMClass=Pinta
+Terminal=false
+Type=Application
+Categories=Graphics;
+Keywords=draw;drawing;paint;painting;graphics;raster;2d;
+MimeType=image/bmp;image/gif;image/jpeg;image/jpg;image/pjpeg;image/png;image/svg+xml;image/tiff;image/x-bmp;image/x-gray;image/x-icb;image/x-ico;image/x-png;image/x-portable-anymap;image/x-portable-bitmap;image/x-portable-graymap;image/x-portable-pixmap;image/x-xbitmap;image/x-xpixmap;image/x-pcx;image/x-targa;image/x-tga;image/openraster;
 EOL
 
     update-desktop-database || {
@@ -342,6 +365,7 @@ EOL
 
     echo "👍 Instalação concluída com sucesso!"
     echo "LibreOffice AppImage instalado em: $INSTALL_DIR/$LO_FILENAME"
+    echo "Pinta AppImage instalado em: $INSTALL_DIR/$PINTA_FILENAME"
 }
 
 xtdc_tema() {
@@ -508,10 +532,13 @@ LOG_FILE="/xtdc/xtdc_log_${NOW}.txt"
 chmod 644 "$LOG_FILE"
 
 printf "${COLOR_HEADER}🚀 Iniciando Automação XTDC...${COLOR_RESET}\n"
+apt update 
+apt install -y curl > /dev/null 2>&1
+xtdc_vars
 xtdc_ppa
 xtdc_pkg
 xtdc_download
-xtdc_install_libreoffice_appimage
+xtdc_appimage
 xtdc_tema
 xtdc_limpeza
 printf "${COLOR_SUCCESS}🎉 Todo o processo foi concluído. Log salvo em: $LOG_FILE${COLOR_RESET}\n"
