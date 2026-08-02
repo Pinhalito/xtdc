@@ -15,9 +15,9 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2026_08_01_21_21_01
+# 2026_08_02_12_19_20
 
-xtdc_vars() {
+xtdc_vars(){
     COLOR_HEADER='\033[1;36m'
     COLOR_SUCCESS='\033[1;32m'
     COLOR_ERROR='\033[1;31m'
@@ -120,6 +120,7 @@ xtdc_vars() {
 '
     )
 }
+xtdc_vars
 
 
 xtdc_loga(){
@@ -129,7 +130,7 @@ xtdc_loga(){
 }
 
 
-xtdc_limpeza() {
+xtdc_limpeza(){
 
     printf "${COLOR_HEADER}LIMPEZA DO SISTEMA${COLOR_RESET}\n\n"
 
@@ -193,7 +194,7 @@ xtdc_limpeza() {
 }
 
 
-xtdc_pkg() {
+xtdc_pkg(){
     printf "${COLOR_HEADER}INSTALANDO PACOTES E APLICATIVOS${COLOR_RESET}\n\n"
 
     printf "Atualizando repositórios... "
@@ -307,10 +308,85 @@ xtdc_pkg() {
 }
 
 
+xtdc_ptbr(){
+#####################################################################
+set -euo pipefail
+
+LOCALE="pt_BR.UTF-8"
+LANGUAGE_VALUE="pt_BR:pt"
+
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get update
+apt-get install -y locales ca-certificates
+
+# 1) Garantir locale no /etc/locale.gen
+LOCALE_GEN_LINE="${LOCALE} UTF-8"
+if grep -qE '^[#]*[[:space:]]*'"$LOCALE_GEN_LINE"'\b' /etc/locale.gen; then
+  sed -i -E 's/^[#][[:space:]]*('"$LOCALE_GEN_LINE"')/\1/' /etc/locale.gen
+else
+  echo "$LOCALE_GEN_LINE" >> /etc/locale.gen
+fi
+
+# 2) Gerar locale
+locale-gen "$LOCALE"
+
+# 3) Definir como padrão do sistema
+cat > /etc/default/locale <<EOF
+LANG=${LOCALE}
+LANGUAGE=${LANGUAGE_VALUE}
+LC_ALL=${LOCALE}
+EOF
+
+# Aplicar imediatamente
+update-locale LANG="${LOCALE}" LANGUAGE="${LANGUAGE_VALUE}" LC_ALL="${LOCALE}" || true
+
+# 4) Configurar /etc/skel para futuros usuários
+install -d -m 0755 /etc/skel
+
+# .profile (login shells)
+cat > /etc/skel/.profile <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+# .bashrc (interactive shells)
+cat > /etc/skel/.bashrc <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+# 5) Também vale setar no ambiente do root (já que você está como root)
+cat > /root/.profile <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+cat > /root/.bashrc <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+echo "OK. Verificando:"
+echo "Sistema:"
+locale || true
+
+echo
+echo "Arquivos relevantes:"
+echo "/etc/default/locale"
+echo "/etc/skel/.profile"
+echo "/etc/skel/.bashrc"
+}
+
+
 #####################################################################
 
 
-xtdc_download() {
+xtdc_download(){
 	    mkdir -p -m 755 "$DOWNLOAD_DIR" || {
         printf "${COLOR_ERROR}Falha ao criar diretório ${DOWNLOAD_DIR}${COLOR_RESET}\n"
         return 1
@@ -331,7 +407,7 @@ xtdc_download() {
 }
 
 
-xtdc_appimage() {
+xtdc_appimage(){
     mkdir -p -m 755 "$INSTALL_DIR" || {
         echo "Erro ao criar diretório $INSTALL_DIR"
         return 1
@@ -439,7 +515,7 @@ EOL
 }
 
 
-xtdc_tema() {
+xtdc_tema(){
     if [ -d "/usr/share/lightdm" ]; then
         mkdir -p -m 755 "${LIGHTDM_CONF_DIR}" && chmod 755 "${LIGHTDM_CONF_DIR}" && {
             cat <<'EOF' | tee "${LIGHTDM_CONF_DIR}/01_ubuntu.conf" >/dev/null
@@ -579,7 +655,7 @@ EOF
 # 1) lista dos programas já instalados (apenas nomes limpos), feita uma vez
 INSTALADOS="$(dpkg-query -W -f='${binary:Package}\n' 2>/dev/null)"
 
-tem_no_passado() {
+tem_no_passado(){
   # $1 = pacote
   printf "%s\n" "$INSTALADOS" | grep -Fxq -- "$1"
 }
