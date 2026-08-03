@@ -18,6 +18,10 @@
 # 2026_08_03_20_05_28
 
 xtdc_vars(){
+	HOJE=$(date +'%Y_%m_%d')
+	AGORA=$(date +'%Y_%m_%d_%H_%M')
+
+	
     COLOR_HEADER='\033[1;36m'
     COLOR_SUCCESS='\033[1;32m'
     COLOR_ERROR='\033[1;31m'
@@ -109,6 +113,7 @@ xtdc_vars(){
 	fonts-tlwg-typewriter fonts-tlwg-typewriter-ttf fonts-tlwg-typist fonts-tlwg-typist-ttf
 	fonts-tlwg-typo fonts-tlwg-typo-ttf fonts-tlwg-umpush fonts-tlwg-umpush-ttf fonts-tlwg-waree fonts-tlwg-waree-ttf
     )
+    printf "${COLOR_HEADER}VARIÁVEIS CARREGADAS${COLOR_RESET}\n\n"
 }
 xtdc_vars
 
@@ -121,7 +126,6 @@ xtdc_loga(){
 
 
 xtdc_limpeza(){
-
     printf "${COLOR_HEADER}LIMPEZA DO SISTEMA${COLOR_RESET}\n\n"
 
     if ! command -v apt-get &>/dev/null || ! command -v dpkg &>/dev/null; then
@@ -446,10 +450,6 @@ echo "/etc/skel/.bashrc"
 }
 
 
-#####################
-# REVISADO ATÉ AQUI #
-#####################
-
 xtdc_download(){
 	    mkdir -p -m 755 "$DOWNLOAD_DIR" || {
         printf "${COLOR_ERROR}Falha ao criar diretório ${DOWNLOAD_DIR}${COLOR_RESET}\n"
@@ -512,10 +512,13 @@ EOF
         fi
     done
 
-    printf "${COLOR_INFO}Instalando skel...${COLOR_RESET}\n"
-    tar -xzf "${DOWNLOAD_DIR}/xtdc_skel.tar.gz" -C /etc/ || {
-        printf "${COLOR_ERROR}Falha ao descompactar skel${COLOR_RESET}\n"
-        return 1
+	printf "${COLOR_INFO}Instalando skel...${COLOR_RESET}\n"
+	if [ -d /etc/skel ]; then
+		cp -a /etc/skel /etc/skel_bkp
+	fi
+	tar -xzf "${DOWNLOAD_DIR}/xtdc_skel.tar.gz" -C /etc/ || {
+    printf "${COLOR_ERROR}Falha ao descompactar skel${COLOR_RESET}\n"
+    return 1
     }
 
     printf "${COLOR_INFO}Instalando ícones...${COLOR_RESET}\n"
@@ -559,6 +562,9 @@ EOF
     printf "- Fontes: /usr/share/fonts/truetype/xtdc_ttf\n"
     printf "- Executável: /bin/xtdc (com permissões 755)${COLOR_RESET}\n"
 }
+
+
+# REVISADO ATÉ AQUI #
 
 
 xtdc_roda(){
@@ -651,7 +657,7 @@ COLOR_ERROR="\e[31m"
 COLOR_INFO="\e[34m"
 COLOR_RESET="\e[0m"
 
-xtdc_loga(){
+xtdc_loga2(){
   LOG_FILE="${HOME:-/tmp}/$(date +'%Y_%m_%d')_log.txt"
   echo "$1" >> "$LOG_FILE"
 }
