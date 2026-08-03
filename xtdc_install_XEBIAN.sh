@@ -15,7 +15,7 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2026_08_02_12_19_20
+# 2026_08_03_20_05_28
 
 xtdc_vars(){
     COLOR_HEADER='\033[1;36m'
@@ -28,12 +28,10 @@ xtdc_vars(){
     PKGS=(
         rclone-browser transmission
         smplayer simplescreenrecorder kodi
-        shotwell 
-        baobab clipit file-roller catfish menulibre
+        shotwell baobab clipit catfish menulibre
         bleachbit evince geany gnome-disk-utility 
         gnome-system-monitor gnome-system-tools gparted
-        p7zip-full rar unrar thunar-archive-plugin
-        speedcrunch synaptic tree xclip
+        p7zip-full thunar-archive-plugin synaptic tree xclip
         gvfs-backends gvfs-fuse samba-libs wmctrl
         task-brazilian-portuguese task-brazilian-portuguese-desktop wbrazilian
     )
@@ -103,13 +101,6 @@ xtdc_vars(){
 	sane-airscan simple-scan snapd system-config-printer system-config-printer-common
 	system-config-printer-udev thunderbird totem ubuntu-docs usb-creator-gtk wireless-regdb
 	wireless-tools wpasupplicant xfburn xfce4-dict xfce4-power-manager xfce4-weather-plugin
-:'
-    firmware-ast firmware-atheros firmware-b43-installer
-	firmware-b43legacy-installer firmware-bnx2 firmware-bnx2x firmware-brcm80211
-	firmware-cavium firmware-cirrus firmware-intel-graphics firmware-intel-misc
-	firmware-intel-sound firmware-ipw2x00 firmware-ivtv firmware-iwlwifi firmware-libertas
-	firmware-marvell-prestera firmware-mediatek firmware-misc-nonfree firmware-myricom
-	firmware-netronome firmware-netxen firmware-qlogic firmware-realtek firmware-siano firmware-sof-signed
 	fonts-cantarell fonts-mathjax fonts-quicksand fonts-tlwg-garuda
 	fonts-tlwg-garuda-ttf fonts-tlwg-kinnari fonts-tlwg-kinnari-ttf
 	fonts-tlwg-laksaman fonts-tlwg-laksaman-ttf fonts-tlwg-loma fonts-tlwg-loma-ttf
@@ -117,7 +108,6 @@ xtdc_vars(){
 	fonts-tlwg-purisa fonts-tlwg-purisa-ttf fonts-tlwg-sawasdee fonts-tlwg-sawasdee-ttf
 	fonts-tlwg-typewriter fonts-tlwg-typewriter-ttf fonts-tlwg-typist fonts-tlwg-typist-ttf
 	fonts-tlwg-typo fonts-tlwg-typo-ttf fonts-tlwg-umpush fonts-tlwg-umpush-ttf fonts-tlwg-waree fonts-tlwg-waree-ttf
-'
     )
 }
 xtdc_vars
@@ -139,7 +129,7 @@ xtdc_limpeza(){
         return 1
     fi
 
-    printf "Atualizando lista de pacotes... "
+    printf "Atualizando lista de pacotes..."
     if apt-get update -qq &>/dev/null; then
         printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
     else
@@ -150,7 +140,7 @@ xtdc_limpeza(){
     printf "\n${COLOR_HEADER}REMOVENDO PACOTES DESNECESSÁRIOS:${COLOR_RESET}\n"
 
     for pkg in "${PACOTES_REMOVER[@]}"; do
-        printf "  ${pkg%%\*}... "
+        printf "${pkg%%\*}..."
         if dpkg -l | grep -q "^ii.*${pkg%%\*}"; then
             if apt-get purge -y "$pkg" &>/dev/null; then
                 printf "${COLOR_SUCCESS}REMOVIDO${COLOR_RESET}\n"
@@ -163,7 +153,7 @@ xtdc_limpeza(){
     done
 
     if dpkg -l snapd &>/dev/null; then
-        printf "\nRemovendo Snap completamente... "
+        printf "\nRemovendo Snap completamente..."
         systemctl stop snapd.{socket,service} &>/dev/null
         if apt-get purge -y snapd gnome-software-plugin-snap &>/dev/null; then
             rm -rf /snap /var/snap /var/lib/snapd ~/snap &>/dev/null
@@ -175,14 +165,14 @@ xtdc_limpeza(){
 
     printf "\n${COLOR_HEADER}LIMPANDO RESÍDUOS DO SISTEMA:${COLOR_RESET}\n"
 
-    printf "Removendo pacotes órfãos... "
+    printf "Removendo pacotes órfãos..."
     if apt-get autoremove -y --purge &>/dev/null; then
         printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
     else
         printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
     fi
 
-    printf "Limpando cache... "
+    printf "Limpando cache..."
     apt-get clean &>/dev/null
     rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* &>/dev/null
     printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
@@ -195,9 +185,10 @@ xtdc_limpeza(){
 
 
 xtdc_pkg(){
+	apt install -y curl
     printf "${COLOR_HEADER}INSTALANDO PACOTES E APLICATIVOS${COLOR_RESET}\n\n"
 
-    printf "Atualizando repositórios... "
+    printf "Atualizando repositórios..."
     if apt-get update -qq; then
         printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
     else
@@ -222,53 +213,16 @@ xtdc_pkg(){
         printf "\nINSTALANDO %d PACOTES\n" "${#to_install[@]}"
 
         if apt-get install -y --no-install-recommends "${to_install[@]}" >/dev/null 2>&1; then
-            printf "  ${COLOR_SUCCESS}Pacotes instalados com sucesso${COLOR_RESET}\n"
+            printf "${COLOR_SUCCESS}Pacotes instalados com sucesso${COLOR_RESET}\n"
         else
-            printf "  ${COLOR_ERROR}Erro na instalação de alguns pacotes${COLOR_RESET}\n"
+            printf "${COLOR_ERROR}Erro na instalação de alguns pacotes${COLOR_RESET}\n"
         fi
     else
-        printf "  ${COLOR_INFO}Todos os pacotes já estão instalados${COLOR_RESET}\n"
+        printf "${COLOR_INFO}Todos os pacotes já estão instalados${COLOR_RESET}\n"
     fi
-
-    printf "\nAPLICATIVOS EXTERNOS\n"
-
-    printf "${COLOR_HEADER}INSTALANDO GOOGLE CHROME${COLOR_RESET}\n\n"
-
-    printf "  Google Chrome... "
-    if ! [ -x /usr/bin/google-chrome ] && ! [ -x /opt/google/chrome/google-chrome ]; then
-        if curl -fsSL https://dl.google.com/linux/linux_signing_key.pub \
-            | gpg --dearmor \
-            | tee /usr/share/keyrings/google-chrome.gpg >/dev/null \
-        && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
-            | tee /etc/apt/sources.list.d/google-chrome.list >/dev/null \
-        && apt update -qq >/dev/null \
-        && apt install -y google-chrome-stable >/dev/null 2>&1; then
-            printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
-        else
-            printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
-        fi
-    else
-        printf "${COLOR_INFO}JÁ INSTALADO${COLOR_RESET}\n"
-    fi
-
-    printf "\nEXTENSÕES DO GOOGLE CHROME\n"
-
-    mkdir -p -m 755 "$CHROME_EXT_DIR"
-
-    for ext_id in "${!CHROME_EXT[@]}"; do
-        printf "  ${CHROME_EXT[$ext_id]}... "
-
-        if echo '{ "external_update_url": "https://clients2.google.com/service/update2/crx" }' \
-            > "${CHROME_EXT_DIR}/${ext_id}.json"; then
-            printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
-        else
-            printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
-        fi
-    done
-
     printf "\n${COLOR_SUCCESS}Instalação concluída com sucesso${COLOR_RESET}\n"
-
-    printf "  Rclone... "
+    
+	printf "Instalando Rclone..."
     if ! command -v rclone >/dev/null; then
         if curl -fsSL https://rclone.org/install.sh | bash >/dev/null 2>&1; then
             printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
@@ -278,8 +232,11 @@ xtdc_pkg(){
     else
         printf "${COLOR_INFO}JÁ INSTALADO${COLOR_RESET}\n"
     fi
+}
 
-    printf "  Brave Browser... "
+
+xtdc_brave(){
+    printf "Brave Browser..."
     if ! command -v brave-browser >/dev/null &&
        ! [ -x /opt/brave.com/brave/brave ]; then
         if curl -fsSL https://dl.brave.com/install.sh | bash >/dev/null 2>&1; then
@@ -295,7 +252,7 @@ xtdc_pkg(){
     mkdir -p -m 755 "$BRAVE_EXT_DIR" 2>/dev/null
 
     for ext_id in "${!BRAVE_EXT[@]}"; do
-        printf "  ${BRAVE_EXT[$ext_id]}... "
+        printf "${BRAVE_EXT[$ext_id]}..."
         if echo '{ "external_update_url": "https://clients2.google.com/service/update2/crx" }' \
             > "${BRAVE_EXT_DIR}/${ext_id}.json" 2>/dev/null; then
             printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
@@ -303,107 +260,6 @@ xtdc_pkg(){
             printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
         fi
     done
-
-    printf "\n${COLOR_SUCCESS}Instalação concluída com sucesso${COLOR_RESET}\n"
-}
-
-
-xtdc_ptbr(){
-#####################################################################
-set -euo pipefail
-
-LOCALE="pt_BR.UTF-8"
-LANGUAGE_VALUE="pt_BR:pt"
-
-export DEBIAN_FRONTEND=noninteractive
-
-apt-get update
-apt-get install -y locales ca-certificates
-
-# 1) Garantir locale no /etc/locale.gen
-LOCALE_GEN_LINE="${LOCALE} UTF-8"
-if grep -qE '^[#]*[[:space:]]*'"$LOCALE_GEN_LINE"'\b' /etc/locale.gen; then
-  sed -i -E 's/^[#][[:space:]]*('"$LOCALE_GEN_LINE"')/\1/' /etc/locale.gen
-else
-  echo "$LOCALE_GEN_LINE" >> /etc/locale.gen
-fi
-
-# 2) Gerar locale
-locale-gen "$LOCALE"
-
-# 3) Definir como padrão do sistema
-cat > /etc/default/locale <<EOF
-LANG=${LOCALE}
-LANGUAGE=${LANGUAGE_VALUE}
-LC_ALL=${LOCALE}
-EOF
-
-# Aplicar imediatamente
-update-locale LANG="${LOCALE}" LANGUAGE="${LANGUAGE_VALUE}" LC_ALL="${LOCALE}" || true
-
-# 4) Configurar /etc/skel para futuros usuários
-install -d -m 0755 /etc/skel
-
-# .profile (login shells)
-cat > /etc/skel/.profile <<EOF
-export LANG=${LOCALE}
-export LANGUAGE=${LANGUAGE_VALUE}
-export LC_ALL=${LOCALE}
-EOF
-
-# .bashrc (interactive shells)
-cat > /etc/skel/.bashrc <<EOF
-export LANG=${LOCALE}
-export LANGUAGE=${LANGUAGE_VALUE}
-export LC_ALL=${LOCALE}
-EOF
-
-# 5) Também vale setar no ambiente do root (já que você está como root)
-cat > /root/.profile <<EOF
-export LANG=${LOCALE}
-export LANGUAGE=${LANGUAGE_VALUE}
-export LC_ALL=${LOCALE}
-EOF
-
-cat > /root/.bashrc <<EOF
-export LANG=${LOCALE}
-export LANGUAGE=${LANGUAGE_VALUE}
-export LC_ALL=${LOCALE}
-EOF
-
-echo "OK. Verificando:"
-echo "Sistema:"
-locale || true
-
-echo
-echo "Arquivos relevantes:"
-echo "/etc/default/locale"
-echo "/etc/skel/.profile"
-echo "/etc/skel/.bashrc"
-}
-
-
-#####################################################################
-
-
-xtdc_download(){
-	    mkdir -p -m 755 "$DOWNLOAD_DIR" || {
-        printf "${COLOR_ERROR}Falha ao criar diretório ${DOWNLOAD_DIR}${COLOR_RESET}\n"
-        return 1
-    }
-
-    printf "${COLOR_HEADER}Iniciando downloads...${COLOR_RESET}\n"
-    for file in "${FILE_LIST[@]}"; do
-        printf "${COLOR_INFO}Baixando ${file}...${COLOR_RESET}\n"
-        curl -sL "${GH_URL}/${file}" -o "${DOWNLOAD_DIR}/${file}" || {
-            printf "${COLOR_ERROR}Falha no download de ${file}${COLOR_RESET}\n"
-            continue
-        }
-        printf "${COLOR_SUCCESS}${file} baixado com sucesso${COLOR_RESET}\n"
-    done
-
-    chmod -R u+rwX,go+rX "$DOWNLOAD_DIR" > /dev/null 2>&1
-    printf "${COLOR_SUCCESS}Downloads concluídos${COLOR_RESET}\n"
 }
 
 
@@ -515,6 +371,106 @@ EOL
 }
 
 
+xtdc_ptbr(){
+#####################################################################
+set -euo pipefail
+
+LOCALE="pt_BR.UTF-8"
+LANGUAGE_VALUE="pt_BR:pt"
+
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get update
+apt-get install -y locales ca-certificates
+
+# 1) Garantir locale no /etc/locale.gen
+LOCALE_GEN_LINE="${LOCALE} UTF-8"
+if grep -qE '^[#]*[[:space:]]*'"$LOCALE_GEN_LINE"'\b' /etc/locale.gen; then
+  sed -i -E 's/^[#][[:space:]]*('"$LOCALE_GEN_LINE"')/\1/' /etc/locale.gen
+else
+  echo "$LOCALE_GEN_LINE" >> /etc/locale.gen
+fi
+
+# 2) Gerar locale
+locale-gen "$LOCALE"
+
+# 3) Definir como padrão do sistema
+cat > /etc/default/locale <<EOF
+LANG=${LOCALE}
+LANGUAGE=${LANGUAGE_VALUE}
+LC_ALL=${LOCALE}
+EOF
+
+# Aplicar imediatamente
+update-locale LANG="${LOCALE}" LANGUAGE="${LANGUAGE_VALUE}" LC_ALL="${LOCALE}" || true
+
+# 4) Configurar /etc/skel para futuros usuários
+install -d -m 0755 /etc/skel
+
+# .profile (login shells)
+cat > /etc/skel/.profile <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+# .bashrc (interactive shells)
+cat > /etc/skel/.bashrc <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+# 5) Também vale setar no ambiente do root (já que você está como root)
+cat > /root/.profile <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+cat > /root/.bashrc <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+echo "OK. Verificando:"
+echo "Sistema:"
+locale || true
+
+echo
+echo "Arquivos relevantes:"
+echo "/etc/default/locale"
+echo "/etc/skel/.profile"
+echo "/etc/skel/.bashrc"
+}
+
+
+#####################
+# REVISADO ATÉ AQUI #
+#####################
+
+xtdc_download(){
+	    mkdir -p -m 755 "$DOWNLOAD_DIR" || {
+        printf "${COLOR_ERROR}Falha ao criar diretório ${DOWNLOAD_DIR}${COLOR_RESET}\n"
+        return 1
+    }
+
+    printf "${COLOR_HEADER}Iniciando downloads...${COLOR_RESET}\n"
+    for file in "${FILE_LIST[@]}"; do
+        printf "${COLOR_INFO}Baixando ${file}...${COLOR_RESET}\n"
+        curl -sL "${GH_URL}/${file}" -o "${DOWNLOAD_DIR}/${file}" || {
+            printf "${COLOR_ERROR}Falha no download de ${file}${COLOR_RESET}\n"
+            continue
+        }
+        printf "${COLOR_SUCCESS}${file} baixado com sucesso${COLOR_RESET}\n"
+    done
+
+    chmod -R u+rwX,go+rX "$DOWNLOAD_DIR" > /dev/null 2>&1
+    printf "${COLOR_SUCCESS}Downloads concluídos${COLOR_RESET}\n"
+}
+
+
 xtdc_tema(){
     if [ -d "/usr/share/lightdm" ]; then
         mkdir -p -m 755 "${LIGHTDM_CONF_DIR}" && chmod 755 "${LIGHTDM_CONF_DIR}" && {
@@ -598,10 +554,10 @@ EOF
 
     printf "${COLOR_SUCCESS}Instalação concluída com sucesso${COLOR_RESET}\n"
     printf "${COLOR_INFO}Os seguintes itens foram instalados:\n"
-    printf "  - Ícones: /usr/share/icons/xtdc_icons e /usr/share/icons/xtdc_svg\n"
-    printf "  - Temas: /usr/share/themes/xtdc_theme e /usr/share/themes/xtdc_dark\n"
-    printf "  - Fontes: /usr/share/fonts/truetype/xtdc_ttf\n"
-    printf "  - Executável: /bin/xtdc (com permissões 755)${COLOR_RESET}\n"
+    printf "- Ícones: /usr/share/icons/xtdc_icons e /usr/share/icons/xtdc_svg\n"
+    printf "- Temas: /usr/share/themes/xtdc_theme e /usr/share/themes/xtdc_dark\n"
+    printf "- Fontes: /usr/share/fonts/truetype/xtdc_ttf\n"
+    printf "- Executável: /bin/xtdc (com permissões 755)${COLOR_RESET}\n"
 }
 
 
@@ -729,22 +685,17 @@ if [ ${#to_install[@]} -gt 0 ]; then
   apt-get update >/dev/null 2>&1
 
   if apt-get install -y --no-install-recommends "${to_install[@]}" >/dev/null 2>&1; then
-    printf "  ${COLOR_SUCCESS}Pacotes instalados com sucesso${COLOR_RESET}\n"
+    printf "${COLOR_SUCCESS}Pacotes instalados com sucesso${COLOR_RESET}\n"
     xtdc_loga "Instalação concluída: ${to_install[*]}"
   else
-    printf "  ${COLOR_ERROR}Erro na instalação de alguns pacotes${COLOR_RESET}\n"
+    printf "${COLOR_ERROR}Erro na instalação de alguns pacotes${COLOR_RESET}\n"
     xtdc_loga "Falha na instalação: ${to_install[*]}"
   fi
 else
-  printf "  ${COLOR_INFO}Todos os pacotes já estão instalados${COLOR_RESET}\n"
+  printf "${COLOR_INFO}Todos os pacotes já estão instalados${COLOR_RESET}\n"
   xtdc_loga "Nenhum pacote a instalar (todos já instalados)."
 fi
 
 
 
 }
-
-
-#sed -i 's/main/main contrib non-free/g' /etc/apt/sources.list
-#apt update
-#apt install rar unrar
