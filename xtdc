@@ -15,10 +15,10 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2026_07_15_16_51_43
+# 2026_08_03_21_19_42
 
 
-xtdc_carga() {
+xtdc_carga(){
 if [ -f /bin/xtdc ]; then
     source /bin/xtdc
 notify-send -t 3000 -i dialog-information "XTDC" "Funções carregadas em: $(date +%H:%M:%S)"
@@ -33,7 +33,7 @@ xtdc_norma(){
 }
 
 
-xtdc_printa() {
+xtdc_printa(){
     local agora=$(date +%Y_%m_%d_%H_%M_%S)
     local destino="${HOME}/Imagens/PRINTS"
     mkdir -p "$destino"
@@ -79,7 +79,12 @@ done
 
 
 xtdc_calculadoranotopo(){
-	speedcrunch & for i in $(seq 1 50); do ID=$(wmctrl pip3 -l | grep -i speedcrunch | awk '{print $1; exit}'); [ -n "$ID" ] && wmctrl pip3 -i -r "$ID" -b add,above && exit 0; sleep 0.1; done
+	speedcrunch &
+for i in $(seq 1 50); do
+	ID=$(wmctrl pip3 -l | grep -i speedcrunch | awk '{print $1; exit}')
+	[ -n "$ID" ] && wmctrl pip3 -i -r "$ID" -b add,above && exit 0
+	sleep 0.1
+done
 # gnome-system-monitor
 }
 
@@ -88,8 +93,7 @@ xtdc_calculadoranotopo(){
 # =================================================⚡
 
 
-
-xtdc_bkp_enhanced() {
+xtdc_bkp_enhanced(){
     local timestamp=$(date +"%Y_%m_%d_%H_%M_%S")
     local backup_file="/xtdc/xtdc_bkp_${timestamp}.tar.gz"
     local items=(
@@ -110,7 +114,7 @@ xtdc_bkp_enhanced() {
     echo "✅ Backup criado: $backup_file ($(du -h "$backup_file" | cut -f1))"
 }
 
-xtdc_bkp() {
+xtdc_bkp(){
 DIRETORIOS=(
         "/etc/skel"
         "/usr/share/icons/xtdc_icons"
@@ -154,7 +158,7 @@ else
 fi
 }
 
-xtdc_bkp2() {
+xtdc_bkp2(){
     # Define o nome do arquivo com timestamp
     local timestamp=$(date +"%Y_%m_%d_%H_%M_%S")
     local output_file="/xtdc/xtdc_bkp_${timestamp}.tar.gz"
@@ -173,7 +177,7 @@ xtdc_bkp2() {
     echo "✅ Arquivo criado: $output_file"
 }
 
-xtdc_update_from_tar() {
+xtdc_update_from_tar(){
     local timestamp=$(date +"%Y_%m_%d_%H_%M_%S")
     local downloaded_file="/xtdc/xtdc_zip_${timestamp}.tar.gz"
     local tar_url="https://raw.githubusercontent.com/Pinhalito/xtdc/refs/heads/main/xtdc_zip.tar.gz"
@@ -185,7 +189,7 @@ xtdc_update_from_tar() {
     echo "✅ Atualização concluída!"
 }
 
-xtdc_last() {
+xtdc_last(){
 # Últimas imagens abertas
 # grep -oP 'href="file://.*\.(png|jpg|jpeg)"' ~/.local/share/recently-used.xbel	
 	
@@ -211,7 +215,7 @@ tac ~/.local/share/recently-used.xbel | grep -A 2 -P 'href="file://.*\.(mp4|mkv)
 
 }
 
-xtdc_lista_arquivos() {
+xtdc_lista_arquivos(){
     cd "$1/.." || exit  # Sobe um nível
     NOME_PASTA=$(basename "$1")
     DATA=$(date +"%Y_%m_%d")
@@ -219,8 +223,13 @@ xtdc_lista_arquivos() {
     xfce4-terminal -e "cat ${NOME_PASTA}_listadearquivos_${DATA}.txt"
 }
 
-xtdc_last3() {
+xtdc_last3(){
 	find ./ -type f -printf '%T@ %p\n' | sort -n | tail -n 10 | cut -d' ' -f2-
+}
+
+xtdc_instalados(){
+dpkg-query -f '${Package}\n' -W 
+	
 }
 
 # =================================================⚡
