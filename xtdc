@@ -15,7 +15,7 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2026_08_03_21_19_42
+# 2026_08_05_12_29_26
 
 
 xtdc_carga(){
@@ -68,29 +68,37 @@ journalctl -b 0 -p 3 --no-pager > "$HOME/Documentos/historicos/$(date +'%Y_%m_%d
 
 xtdc_terminalnotopo(){
 	xfce4-terminal &
-
 for i in $(seq 1 100); do
-  ID=$(wmctrl pip3 -lx | grep -i 'xfce4-terminal\.xfce4-terminal' | awk '{print $1; exit}')
-  [ -n "$ID" ] && wmctrl pip3 -i -r "$ID" -b add,above && exit 0
+  ID=$(wmctrl -lx | grep -i 'xfce4-terminal\.xfce4-terminal' | awk '{print $1; exit}')
+  [ -n "$ID" ] && wmctrl -i -r "$ID" -b add,above && exit 0
   sleep 0.1
 done
-
 }
 
 
 xtdc_calculadoranotopo(){
 	speedcrunch &
 for i in $(seq 1 50); do
-	ID=$(wmctrl pip3 -l | grep -i speedcrunch | awk '{print $1; exit}')
-	[ -n "$ID" ] && wmctrl pip3 -i -r "$ID" -b add,above && exit 0
+	ID=$(wmctrl -l | grep -i speedcrunch | awk '{print $1; exit}')
+	[ -n "$ID" ] && wmctrl -i -r "$ID" -b add,above && exit 0
 	sleep 0.1
 done
-# gnome-system-monitor
 }
 
-# =================================================⚡
-# ===============FIM DOS MAIS USADOS===============⚡
-# =================================================⚡
+
+xtdc_gerenciadornotopo(){
+	gnome-system-monitor &
+for i in $(seq 1 50); do
+	ID=$(wmctrl -l | grep -i gnome-system-monitor | awk '{print $1; exit}')
+	[ -n "$ID" ] && wmctrl -i -r "$ID" -b add,above && exit 0
+	sleep 0.1
+done
+}
+
+
+# =================================================
+# ===============FIM DOS MAIS USADOS===============
+# =================================================
 
 
 xtdc_bkp_enhanced(){
@@ -232,7 +240,7 @@ dpkg-query -f '${Package}\n' -W
 	
 }
 
-# =================================================⚡
+# =================================================
 # Chama a função principal se o script for executado diretamente
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     "$@"

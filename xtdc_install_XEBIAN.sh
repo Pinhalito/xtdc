@@ -15,12 +15,11 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2026_08_03_20_05_28
+# 2026_08_05_12_29_37
 
 xtdc_vars(){
 	HOJE=$(date +'%Y_%m_%d')
 	AGORA=$(date +'%Y_%m_%d_%H_%M')
-
 	
     COLOR_HEADER='\033[1;36m'
     COLOR_SUCCESS='\033[1;32m'
@@ -40,7 +39,6 @@ xtdc_vars(){
         task-brazilian-portuguese task-brazilian-portuguese-desktop wbrazilian
     )
 
-    # Google Chrome / Brave extensões
     CHROME_EXT_DIR="/opt/google/chrome/extensions"
     declare -A CHROME_EXT=(
         ["ponfpcnoihfmfllpaingbgckeeldkhle"]="Enhancer for YouTube"
@@ -55,7 +53,6 @@ xtdc_vars(){
         ["mnjggcdmjocbbbhaepdhchncahnbgone"]="SponsorBlock para YouTube"
     )
 
-    # AppImage
     INSTALL_DIR="/xtdc/appimages"
     
     LO_URL="https://appimages.libreitalia.org/LibreOffice-still.standard-x86_64.AppImage"
@@ -70,21 +67,11 @@ xtdc_vars(){
     SC_FILENAME="SpeedCrunch.AppImage"
     SC_DESKTOP_FILE="/usr/share/applications/speedcrunch.desktop"
     
-    # Tema LightDM
     LIGHTDM_CONF_DIR="/usr/share/lightdm/lightdm-gtk-greeter.conf.d"
 
-    # Downloads do repositório
     GH_URL="https://github.com/Pinhalito/xtdc/raw/refs/heads/main"
     DOWNLOAD_DIR="/xtdc"
     FILE_LIST=(
-        "xtdc_icons.tar.gz"
-        "xtdc_theme.tar.gz"
-        "xtdc_ttf.tar.gz"
-        "xtdc_skel.tar.gz"
-        "xtdc"
-    )
-
-    REQUIRED_FILES=(
         "xtdc_icons.tar.gz"
         "xtdc_theme.tar.gz"
         "xtdc_ttf.tar.gz"
@@ -101,7 +88,7 @@ xtdc_vars(){
 	gnome-initial-setup gnome-logs gnome-mahjongg gnome-mines gnome-online-accounts
 	gnome-software-plugin-snap gnome-sudoku gucharmap hunspell-en-us libcheese8
 	libreoffice-calc libreoffice-gtk libreoffice-style-elementary libreoffice-writer mate-calc
-	mate-calc-common mousepad openvpn parole pocketsphinx-en-us printer-driver-* remmina rhythmbox
+	mate-calc-common mousepad openvpn parole pocketsphinx-en-us remmina rhythmbox
 	sane-airscan simple-scan snapd system-config-printer system-config-printer-common
 	system-config-printer-udev thunderbird totem ubuntu-docs usb-creator-gtk wireless-regdb
 	wireless-tools wpasupplicant xfburn xfce4-dict xfce4-power-manager xfce4-weather-plugin
@@ -183,15 +170,13 @@ xtdc_limpeza(){
 
     printf "\n${COLOR_SUCCESS}Limpeza concluída com sucesso${COLOR_RESET}\n"
     printf "${COLOR_WARNING}️ Recomenda-se reiniciar o sistema.${COLOR_RESET}\n"
-
-    rm -rf /usr/share/fonts/truetype/tlwg
 }
 
 
 xtdc_pkg(){
 	apt install -y curl
-    printf "${COLOR_HEADER}INSTALANDO PACOTES E APLICATIVOS${COLOR_RESET}\n\n"
 
+    printf "${COLOR_HEADER}INSTALANDO PACOTES E APLICATIVOS${COLOR_RESET}\n\n"
     printf "Atualizando repositórios..."
     if apt-get update -qq; then
         printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
@@ -306,7 +291,6 @@ xtdc_appimage(){
     }
 
 
-
     echo "Criando arquivos .desktop..."
     cat > "$LO_DESKTOP_FILE" <<'EOL'
 [Desktop Entry]
@@ -376,7 +360,6 @@ EOL
 
 
 xtdc_ptbr(){
-#####################################################################
 set -euo pipefail
 
 LOCALE="pt_BR.UTF-8"
@@ -387,7 +370,6 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y locales ca-certificates
 
-# 1) Garantir locale no /etc/locale.gen
 LOCALE_GEN_LINE="${LOCALE} UTF-8"
 if grep -qE '^[#]*[[:space:]]*'"$LOCALE_GEN_LINE"'\b' /etc/locale.gen; then
   sed -i -E 's/^[#][[:space:]]*('"$LOCALE_GEN_LINE"')/\1/' /etc/locale.gen
@@ -395,37 +377,30 @@ else
   echo "$LOCALE_GEN_LINE" >> /etc/locale.gen
 fi
 
-# 2) Gerar locale
 locale-gen "$LOCALE"
 
-# 3) Definir como padrão do sistema
 cat > /etc/default/locale <<EOF
 LANG=${LOCALE}
 LANGUAGE=${LANGUAGE_VALUE}
 LC_ALL=${LOCALE}
 EOF
 
-# Aplicar imediatamente
 update-locale LANG="${LOCALE}" LANGUAGE="${LANGUAGE_VALUE}" LC_ALL="${LOCALE}" || true
 
-# 4) Configurar /etc/skel para futuros usuários
 install -d -m 0755 /etc/skel
 
-# .profile (login shells)
 cat > /etc/skel/.profile <<EOF
 export LANG=${LOCALE}
 export LANGUAGE=${LANGUAGE_VALUE}
 export LC_ALL=${LOCALE}
 EOF
 
-# .bashrc (interactive shells)
 cat > /etc/skel/.bashrc <<EOF
 export LANG=${LOCALE}
 export LANGUAGE=${LANGUAGE_VALUE}
 export LC_ALL=${LOCALE}
 EOF
 
-# 5) Também vale setar no ambiente do root (já que você está como root)
 cat > /root/.profile <<EOF
 export LANG=${LOCALE}
 export LANGUAGE=${LANGUAGE_VALUE}
@@ -504,14 +479,6 @@ EOF
 
     printf "${COLOR_HEADER}Iniciando instalação...${COLOR_RESET}\n"
 
-    for file in "${REQUIRED_FILES[@]}"; do
-        if [ ! -f "${DOWNLOAD_DIR}/${file}" ]; then
-            printf "${COLOR_ERROR}Arquivo ${file} não encontrado em ${DOWNLOAD_DIR}${COLOR_RESET}\n"
-            printf "${COLOR_INFO}Execute xtdc_download primeiro para baixar os arquivos.${COLOR_RESET}\n"
-            return 1
-        fi
-    done
-
 	printf "${COLOR_INFO}Instalando skel...${COLOR_RESET}\n"
 	if [ -d /etc/skel ]; then
 		cp -a /etc/skel /etc/skel_bkp
@@ -564,11 +531,7 @@ EOF
 }
 
 
-# REVISADO ATÉ AQUI #
-
-
 xtdc_roda(){
-# Criação do arquivo de log
 NOW=$(date +'%Y_%m_%d_%H_%M_%S')
 LOG_FILE="/xtdc/xtdc_log_${NOW}.txt"
 
@@ -580,31 +543,18 @@ LOG_FILE="/xtdc/xtdc_log_${NOW}.txt"
 chmod 644 "$LOG_FILE"
 
 printf "${COLOR_HEADER}Iniciando Automação XTDC...${COLOR_RESET}\n"
-apt update 
-apt install -y curl > /dev/null 2>&1
 xtdc_vars
 xtdc_pkg
-xtdc_download
 xtdc_appimage
+xtdc_download
 xtdc_tema
-xtdc_limpeza
+#xtdc_limpeza
 printf "${COLOR_SUCCESS}Todo o processo foi concluído. Log salvo em: $LOG_FILE${COLOR_RESET}\n"
 printf "${COLOR_WARNING}Recomenda-se reiniciar o sistema.${COLOR_RESET}\n"
 }
 
 
-xtdc_lista(){
-rclone-browser transmission brave
-smplayer simplescreenrecorder kodi
-eog shotwell pinta
-baobab clipit file-roller catfish menulibre
-bleachbit evince geany gnome-disk-utility 
-gnome-system-monitor gnome-system-tools gparted
-p7zip-full rar unrar thunar-archive-plugin
-synaptic tree xclip wmctrl
-
-
-}
+# REVISADO ATÉ AQUI #
 
 
 xtdc_instala(){
@@ -649,29 +599,10 @@ done
 }
 
 
-novo(){
-
-
-COLOR_SUCCESS="\e[32m"
-COLOR_ERROR="\e[31m"
-COLOR_INFO="\e[34m"
-COLOR_RESET="\e[0m"
-
-xtdc_loga2(){
-  LOG_FILE="${HOME:-/tmp}/$(date +'%Y_%m_%d')_log.txt"
-  echo "$1" >> "$LOG_FILE"
-}
-
-installed_pkgs=()
-to_install=()
-
-PKGS=(
-  smplayer simplescreenrecorder kodi
-  eog shotwell
-  baobab catfish menulibre
-  evince geany gnome-disk-utility
-  gnome-system-monitor gnome-system-tools gparted
-  p7zip-full rar unrar synaptic wmctrl
+xtdc_instala_novo(){
+installed_pkgs=(
+)
+to_install=(
 )
 
 for pkg in "${PKGS[@]}"; do
