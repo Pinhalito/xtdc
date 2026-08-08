@@ -15,7 +15,7 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2026_08_05_12_29_37
+# 2026_08_06_23_07_07
 
 xtdc_vars(){
 	HOJE=$(date +'%Y_%m_%d')
@@ -102,7 +102,6 @@ xtdc_vars(){
     )
     printf "${COLOR_HEADER}VARIÁVEIS CARREGADAS${COLOR_RESET}\n\n"
 }
-xtdc_vars
 
 
 xtdc_loga(){
@@ -114,11 +113,6 @@ xtdc_loga(){
 
 xtdc_limpeza(){
     printf "${COLOR_HEADER}LIMPEZA DO SISTEMA${COLOR_RESET}\n\n"
-
-    if ! command -v apt-get &>/dev/null || ! command -v dpkg &>/dev/null; then
-        printf "${COLOR_ERROR}Erro: Sistema de pacotes não encontrado${COLOR_RESET}\n"
-        return 1
-    fi
 
     printf "Atualizando lista de pacotes..."
     if apt-get update -qq &>/dev/null; then
@@ -169,7 +163,6 @@ xtdc_limpeza(){
     printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
 
     printf "\n${COLOR_SUCCESS}Limpeza concluída com sucesso${COLOR_RESET}\n"
-    printf "${COLOR_WARNING}️ Recomenda-se reiniciar o sistema.${COLOR_RESET}\n"
 }
 
 
