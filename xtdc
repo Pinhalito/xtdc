@@ -67,7 +67,7 @@ journalctl -b 0 -p 3 --no-pager > "$HOME/Documentos/historicos/$(date +'%Y_%m_%d
 
 
 xtdc_terminalnotopo(){
-	xfce4-terminal &
+    xfce4-terminal &
 for i in $(seq 1 100); do
   ID=$(wmctrl -lx | grep -i 'xfce4-terminal\.xfce4-terminal' | awk '{print $1; exit}')
   [ -n "$ID" ] && wmctrl -i -r "$ID" -b add,above && exit 0
@@ -77,28 +77,171 @@ done
 
 
 xtdc_calculadoranotopo(){
-	speedcrunch &
+    speedcrunch &
 for i in $(seq 1 50); do
-	ID=$(wmctrl -l | grep -i speedcrunch | awk '{print $1; exit}')
-	[ -n "$ID" ] && wmctrl -i -r "$ID" -b add,above && exit 0
-	sleep 0.1
+    ID=$(wmctrl -l | grep -i speedcrunch | awk '{print $1; exit}')
+    [ -n "$ID" ] && wmctrl -i -r "$ID" -b add,above && exit 0
+    sleep 0.1
 done
 }
 
 
 xtdc_gerenciadornotopo(){
-	gnome-system-monitor &
+    gnome-system-monitor &
 for i in $(seq 1 50); do
-	ID=$(wmctrl -l | grep -i gnome-system-monitor | awk '{print $1; exit}')
-	[ -n "$ID" ] && wmctrl -i -r "$ID" -b add,above && exit 0
-	sleep 0.1
+    ID=$(wmctrl -l | grep -i gnome-system-monitor | awk '{print $1; exit}')
+    [ -n "$ID" ] && wmctrl -i -r "$ID" -b add,above && exit 0
+    sleep 0.1
 done
 }
 
 
+xtdc_loga(){
+    local msg="${1:-}"
+    local log_file="/xtdc/$(date +'%Y_%m_%d')_log.txt"
+    echo "$msg" >> "$log_file"
+}
+
 # =================================================
 # ===============FIM DOS MAIS USADOS===============
 # =================================================
+xtdc_dif(){
+LC_FILE="lista_c.txt"
+#grep -Fxvf lista_b.txt lista_a.txt > "$LC_FILE" cat "$LC_FILE"
+
+#grep -FxFf lista_b.txt lista_a.txt >> primeira.txt
+
+}
+
+
+xtdc_corujas(){
+
+set -euo pipefail
+
+draw(){
+  local which="$1"
+  printf '\033[H\033[J'
+
+  case "$which" in
+    base)
+      cat <<'EOF'
+#######################
+#                     #
+#    ^...^  `^...^´   #
+#   / o,o \ / O,O \   #
+#   |):::(| |):::(|   #
+# ====" "=====" "==== #
+#                     #
+#######################
+EOF
+      ;;
+    1)
+      cat <<'EOF'
+#######################
+#                     #
+#    ^...^  `^...^´   #
+#   / o,o \ / O,O \   #
+#   |):::(| |):::(|   #
+# ====" "=====" "==== #
+#                     #
+#######################
+EOF
+      ;;
+    2)
+      cat <<'EOF'
+#######################
+#                     #
+#    ^...^  `^...^´   #
+#   / _,_ \ / O,O \   #
+#   |):::(| |):::(|   #
+# ====" "=====" "==== #
+#                     #
+#######################
+EOF
+      ;;
+    3)
+      cat <<'EOF'
+#######################
+#                     #
+#    ^...^  `^...^´   #
+#   / o,o \ / _,_ \   #
+#   |):::(| |):::(|   #
+# ====" "=====" "==== #
+#                     #
+#######################
+EOF
+      ;;
+    4)
+      cat <<'EOF'
+#######################
+#                     #
+#    ^...^  `^...^´   #
+#   / _,_ \ / _,_ \   #
+#   |):::(| |):::(|   #
+# ====" "=====" "==== #
+#                     #
+#######################
+EOF
+      ;;
+  esac
+}
+
+draw base
+
+base_wait_random(){
+  local step="0.1"
+  local min="3.0"
+  local max="5.0"
+  local nsteps=10
+  local k=$((RANDOM % (nsteps + 1)))
+  awk -v k="$k" -v step="$step" -v min="$min" 'BEGIN{printf "%.1f", (min + k*step)}'
+}
+
+set +m
+stty -echo -icanon time 0 min 0 2>/dev/null || true
+cleanup(){
+  stty echo icanon 2>/dev/null || true
+  printf '\033[H\033[J'
+  echo -e "\e[1;31;40mFIM ANIMAÇÃO CORUJAS\e[0m"
+}
+trap cleanup EXIT
+
+while :; do
+  draw base
+
+  t="$(base_wait_random)"
+  waited="0.0"
+
+  while awk -v waited="$waited" -v t="$t" 'BEGIN{exit !(waited < t)}'; do
+    if read -r -t 0.02 -n 1 _key; then
+      exit 0
+    fi
+
+    sleep 0.05
+    waited="$(awk -v waited="$waited" 'BEGIN{printf "%.2f", (waited + 0.05)}')"
+  done
+
+  pick=$(( (RANDOM % 4) + 1 )) # 1..4
+  end_at="$(awk 'BEGIN{print systime() + 0.1}')"
+  draw "$pick"
+
+  while :; do
+    if read -r -t 0.02 -n 1 _key; then
+      exit 0
+    fi
+    now="$(awk 'BEGIN{print systime()}')"
+
+    break
+  done
+  sleep 0.1
+done
+}
+
+
+
+
+
+
 
 
 xtdc_bkp_enhanced(){
@@ -199,9 +342,9 @@ xtdc_update_from_tar(){
 
 xtdc_last(){
 # Últimas imagens abertas
-# grep -oP 'href="file://.*\.(png|jpg|jpeg)"' ~/.local/share/recently-used.xbel	
-	
-	
+# grep -oP 'href="file://.*\.(png|jpg|jpeg)"' ~/.local/share/recently-used.xbel 
+    
+    
 echo "=== IMAGENS (MAIS RECENTES PRIMEIRO) ==="
 tac ~/.local/share/recently-used.xbel | grep -oP 'href="file://\K[^"]*\.(png|jpg|jpeg|gif|bmp|svg|webp)(?=")' | awk '!seen[$0]++'
 
@@ -232,12 +375,12 @@ xtdc_lista_arquivos(){
 }
 
 xtdc_last3(){
-	find ./ -type f -printf '%T@ %p\n' | sort -n | tail -n 10 | cut -d' ' -f2-
+    find ./ -type f -printf '%T@ %p\n' | sort -n | tail -n 10 | cut -d' ' -f2-
 }
 
 xtdc_instalados(){
 dpkg-query -f '${Package}\n' -W 
-	
+    
 }
 
 # =================================================

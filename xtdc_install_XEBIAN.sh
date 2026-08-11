@@ -15,12 +15,9 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2026_08_06_23_07_07
+# 2026_08_08_00_14_32
 
 xtdc_vars(){
-	HOJE=$(date +'%Y_%m_%d')
-	AGORA=$(date +'%Y_%m_%d_%H_%M')
-	
     COLOR_HEADER='\033[1;36m'
     COLOR_SUCCESS='\033[1;32m'
     COLOR_ERROR='\033[1;31m'
@@ -31,7 +28,7 @@ xtdc_vars(){
     PKGS=(
         rclone-browser transmission
         smplayer simplescreenrecorder kodi
-        shotwell baobab clipit catfish menulibre
+        shotwell baobab catfish menulibre
         bleachbit evince geany gnome-disk-utility 
         gnome-system-monitor gnome-system-tools gparted
         p7zip-full thunar-archive-plugin synaptic tree xclip
@@ -80,34 +77,93 @@ xtdc_vars(){
     )
 
     PACOTES_REMOVER=(
-	aisleriot apport apport-symptoms aspell aspell-en atmel-firmware atril
-	atril-common avahi-utils b43-fwcutter bluetooth bluez bluez-firmware
-	cheese cheese-common cups-browsed cups-pk-helper debian-faq deja-dup duplicity
-	firefox firefox-esr
-	gigolo gir1.2-cheese-3.0 gnome-characters gnome-font-viewer
-	gnome-initial-setup gnome-logs gnome-mahjongg gnome-mines gnome-online-accounts
-	gnome-software-plugin-snap gnome-sudoku gucharmap hunspell-en-us libcheese8
-	libreoffice-calc libreoffice-gtk libreoffice-style-elementary libreoffice-writer mate-calc
-	mate-calc-common mousepad openvpn parole pocketsphinx-en-us remmina rhythmbox
-	sane-airscan simple-scan snapd system-config-printer system-config-printer-common
-	system-config-printer-udev thunderbird totem ubuntu-docs usb-creator-gtk wireless-regdb
-	wireless-tools wpasupplicant xfburn xfce4-dict xfce4-power-manager xfce4-weather-plugin
-	fonts-cantarell fonts-mathjax fonts-quicksand fonts-tlwg-garuda
-	fonts-tlwg-garuda-ttf fonts-tlwg-kinnari fonts-tlwg-kinnari-ttf
-	fonts-tlwg-laksaman fonts-tlwg-laksaman-ttf fonts-tlwg-loma fonts-tlwg-loma-ttf
-	fonts-tlwg-mono fonts-tlwg-mono-ttf fonts-tlwg-norasi fonts-tlwg-norasi-ttf
-	fonts-tlwg-purisa fonts-tlwg-purisa-ttf fonts-tlwg-sawasdee fonts-tlwg-sawasdee-ttf
-	fonts-tlwg-typewriter fonts-tlwg-typewriter-ttf fonts-tlwg-typist fonts-tlwg-typist-ttf
-	fonts-tlwg-typo fonts-tlwg-typo-ttf fonts-tlwg-umpush fonts-tlwg-umpush-ttf fonts-tlwg-waree fonts-tlwg-waree-ttf
+    aisleriot apport apport-symptoms aspell aspell-en atmel-firmware atril
+    atril-common avahi-utils b43-fwcutter bluetooth bluez bluez-firmware
+    cheese cheese-common cups-browsed cups-pk-helper debian-faq deja-dup duplicity
+    firefox firefox-esr
+    gigolo gir1.2-cheese-3.0 gnome-characters gnome-font-viewer
+    gnome-initial-setup gnome-logs gnome-mahjongg gnome-mines gnome-online-accounts
+    gnome-software-plugin-snap gnome-sudoku gucharmap hunspell-en-us libcheese8
+    libreoffice-calc libreoffice-gtk libreoffice-style-elementary libreoffice-writer mate-calc
+    mate-calc-common mousepad openvpn parole pocketsphinx-en-us remmina rhythmbox
+    sane-airscan simple-scan snapd system-config-printer system-config-printer-common
+    system-config-printer-udev thunderbird totem ubuntu-docs usb-creator-gtk wireless-regdb
+    wireless-tools wpasupplicant xfburn xfce4-dict xfce4-power-manager xfce4-weather-plugin
+    fonts-quicksand fonts-tlwg-garuda
+    fonts-tlwg-garuda-ttf fonts-tlwg-kinnari fonts-tlwg-kinnari-ttf
+    fonts-tlwg-laksaman fonts-tlwg-laksaman-ttf fonts-tlwg-loma fonts-tlwg-loma-ttf
+    fonts-tlwg-mono fonts-tlwg-mono-ttf fonts-tlwg-norasi fonts-tlwg-norasi-ttf
+    fonts-tlwg-purisa fonts-tlwg-purisa-ttf fonts-tlwg-sawasdee fonts-tlwg-sawasdee-ttf
+    fonts-tlwg-typewriter fonts-tlwg-typewriter-ttf fonts-tlwg-typist fonts-tlwg-typist-ttf
+    fonts-tlwg-typo fonts-tlwg-typo-ttf fonts-tlwg-umpush fonts-tlwg-umpush-ttf fonts-tlwg-waree fonts-tlwg-waree-ttf
     )
     printf "${COLOR_HEADER}VARIÁVEIS CARREGADAS${COLOR_RESET}\n\n"
 }
 
 
-xtdc_loga(){
-    local msg="${1:-}"
-    local log_file="/xtdc/$(date +'%Y_%m_%d')_log.txt"
-    echo "$msg" >> "$log_file"
+xtdc_ptbr(){
+set -euo pipefail
+
+LOCALE="pt_BR.UTF-8"
+LANGUAGE_VALUE="pt_BR:pt"
+
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get update
+apt-get install -y locales ca-certificates
+
+LOCALE_GEN_LINE="${LOCALE} UTF-8"
+if grep -qE '^[#]*[[:space:]]*'"$LOCALE_GEN_LINE"'\b' /etc/locale.gen; then
+  sed -i -E 's/^[#][[:space:]]*('"$LOCALE_GEN_LINE"')/\1/' /etc/locale.gen
+else
+  echo "$LOCALE_GEN_LINE" >> /etc/locale.gen
+fi
+
+locale-gen "$LOCALE"
+
+cat > /etc/default/locale <<EOF
+LANG=${LOCALE}
+LANGUAGE=${LANGUAGE_VALUE}
+LC_ALL=${LOCALE}
+EOF
+
+update-locale LANG="${LOCALE}" LANGUAGE="${LANGUAGE_VALUE}" LC_ALL="${LOCALE}" || true
+
+install -d -m 0755 /etc/skel
+
+cat > /etc/skel/.profile <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+cat > /etc/skel/.bashrc <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+cat > /root/.profile <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+cat > /root/.bashrc <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+echo "OK. Verificando:"
+echo "Sistema:"
+locale || true
+
+echo
+echo "Arquivos relevantes:"
+echo "/etc/default/locale"
+echo "/etc/skel/.profile"
+echo "/etc/skel/.bashrc"
 }
 
 
@@ -167,7 +223,7 @@ xtdc_limpeza(){
 
 
 xtdc_pkg(){
-	apt install -y curl
+    apt install -y curl
 
     printf "${COLOR_HEADER}INSTALANDO PACOTES E APLICATIVOS${COLOR_RESET}\n\n"
     printf "Atualizando repositórios..."
@@ -204,7 +260,7 @@ xtdc_pkg(){
     fi
     printf "\n${COLOR_SUCCESS}Instalação concluída com sucesso${COLOR_RESET}\n"
     
-	printf "Instalando Rclone..."
+    printf "Instalando Rclone..."
     if ! command -v rclone >/dev/null; then
         if curl -fsSL https://rclone.org/install.sh | bash >/dev/null 2>&1; then
             printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
@@ -352,74 +408,8 @@ EOL
 }
 
 
-xtdc_ptbr(){
-set -euo pipefail
-
-LOCALE="pt_BR.UTF-8"
-LANGUAGE_VALUE="pt_BR:pt"
-
-export DEBIAN_FRONTEND=noninteractive
-
-apt-get update
-apt-get install -y locales ca-certificates
-
-LOCALE_GEN_LINE="${LOCALE} UTF-8"
-if grep -qE '^[#]*[[:space:]]*'"$LOCALE_GEN_LINE"'\b' /etc/locale.gen; then
-  sed -i -E 's/^[#][[:space:]]*('"$LOCALE_GEN_LINE"')/\1/' /etc/locale.gen
-else
-  echo "$LOCALE_GEN_LINE" >> /etc/locale.gen
-fi
-
-locale-gen "$LOCALE"
-
-cat > /etc/default/locale <<EOF
-LANG=${LOCALE}
-LANGUAGE=${LANGUAGE_VALUE}
-LC_ALL=${LOCALE}
-EOF
-
-update-locale LANG="${LOCALE}" LANGUAGE="${LANGUAGE_VALUE}" LC_ALL="${LOCALE}" || true
-
-install -d -m 0755 /etc/skel
-
-cat > /etc/skel/.profile <<EOF
-export LANG=${LOCALE}
-export LANGUAGE=${LANGUAGE_VALUE}
-export LC_ALL=${LOCALE}
-EOF
-
-cat > /etc/skel/.bashrc <<EOF
-export LANG=${LOCALE}
-export LANGUAGE=${LANGUAGE_VALUE}
-export LC_ALL=${LOCALE}
-EOF
-
-cat > /root/.profile <<EOF
-export LANG=${LOCALE}
-export LANGUAGE=${LANGUAGE_VALUE}
-export LC_ALL=${LOCALE}
-EOF
-
-cat > /root/.bashrc <<EOF
-export LANG=${LOCALE}
-export LANGUAGE=${LANGUAGE_VALUE}
-export LC_ALL=${LOCALE}
-EOF
-
-echo "OK. Verificando:"
-echo "Sistema:"
-locale || true
-
-echo
-echo "Arquivos relevantes:"
-echo "/etc/default/locale"
-echo "/etc/skel/.profile"
-echo "/etc/skel/.bashrc"
-}
-
-
 xtdc_download(){
-	    mkdir -p -m 755 "$DOWNLOAD_DIR" || {
+        mkdir -p -m 755 "$DOWNLOAD_DIR" || {
         printf "${COLOR_ERROR}Falha ao criar diretório ${DOWNLOAD_DIR}${COLOR_RESET}\n"
         return 1
     }
@@ -472,11 +462,11 @@ EOF
 
     printf "${COLOR_HEADER}Iniciando instalação...${COLOR_RESET}\n"
 
-	printf "${COLOR_INFO}Instalando skel...${COLOR_RESET}\n"
-	if [ -d /etc/skel ]; then
-		cp -a /etc/skel /etc/skel_bkp
-	fi
-	tar -xzf "${DOWNLOAD_DIR}/xtdc_skel.tar.gz" -C /etc/ || {
+    printf "${COLOR_INFO}Instalando skel...${COLOR_RESET}\n"
+    if [ -d /etc/skel ]; then
+        cp -a /etc/skel /etc/skel_bkp
+    fi
+    tar -xzf "${DOWNLOAD_DIR}/xtdc_skel.tar.gz" -C /etc/ || {
     printf "${COLOR_ERROR}Falha ao descompactar skel${COLOR_RESET}\n"
     return 1
     }
@@ -551,7 +541,7 @@ printf "${COLOR_WARNING}Recomenda-se reiniciar o sistema.${COLOR_RESET}\n"
 
 
 xtdc_instala(){
-	
+    
 PKGS=$(cat <<'EOF'
     xablau
 EOF
@@ -629,3 +619,5 @@ fi
 
 
 }
+
+
