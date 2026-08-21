@@ -19,6 +19,7 @@
 
 
 xtdc_carga(){
+exec bash    
 if [ -f /bin/xtdc ]; then
     source /bin/xtdc
 notify-send -t 3000 -i dialog-information "XTDC" "Funções carregadas em: $(date +%H:%M:%S)"
@@ -60,11 +61,24 @@ xtdc_hist(){
 strings -n 4 ~/.local/share/clipit/history > "$HOME/Documentos/historicos/$(date +'%Y_%m_%d_%H_%M_%S')_historico.txt"
 
 cp ~/.bash_history "$HOME/Documentos/historicos/$(date +'%Y_%m_%d_%H_%M_%S')_bash_history.txt"
+echo "Zerado $(date +'%Y_%m_%d_%H_%M_%S')" > $HOME/.bash_history
+notify-send -t 1500 -i dialog-information "XTDC" "Histórico bash e Clipit salvos"
 
-journalctl -b 0 > "$HOME/Documentos/historicos/$(date +'%Y_%m_%d_%H_%M_%S')_boot.txt"
-journalctl -b 0 -p 3 --no-pager > "$HOME/Documentos/historicos/$(date +'%Y_%m_%d_%H_%M_%S')_apenas_erros.txt"
+
+
+#journalctl -b 0 > "$HOME/Documentos/historicos/$(date +'%Y_%m_%d_%H_%M_%S')_boot.txt"
+#journalctl -b 0 -p 3 --no-pager > "$HOME/Documentos/historicos/$(date +'%Y_%m_%d_%H_%M_%S')_apenas_erros.txt"
 }
 
+xtdc_esconde_link(){
+    find . -type l -exec sh -c '
+for link do
+    dir=$(dirname "$link")
+    nome=$(basename "$link")
+    printf "%s\n" "$nome" >> "$dir/.hidden"
+done
+' sh {} +
+}
 
 xtdc_terminalnotopo(){
     xfce4-terminal &
