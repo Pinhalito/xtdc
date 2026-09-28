@@ -26,6 +26,21 @@ notify-send -t 3000 -i dialog-information "XTDC" "Funções carregadas em: $(dat
 fi
 }
 
+xtdc_mp4(){
+    for input in "$@"; do
+  output="${input%.*}.mp4"
+
+  ffmpeg -i "$input" \
+    -c:v libx264 -preset veryfast -crf 23 \
+    -vf "scale='min(1280,iw)':-2" \
+    -pix_fmt yuv420p \
+    -c:a aac -b:a 128k -ac 2 \
+    -movflags +faststart \
+    -y "$output"
+done
+}
+
+
 
 xtdc_norma(){
     local nome=${1::-4}
@@ -36,7 +51,7 @@ xtdc_norma(){
 
 xtdc_printa(){
     local agora=$(date +%Y_%m_%d_%H_%M_%S)
-    local destino="${HOME}/Imagens/PRINTS"
+    local destino="${HOME}/Imagens"
     mkdir -p "$destino"
     local temp_file=$(mktemp "/tmp/temporario_XXXXXX.png")
 
