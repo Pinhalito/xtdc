@@ -1,0 +1,458 @@
+#!/bin/bash
+#
+#######################
+#    ^...^  `^...^´   #
+#   / o,o \ / O,O \   #
+#   |):::(| |):::(|   #
+# ====" "=====" "==== #
+#         TdC         #
+#      1998-2026      #
+#######################
+#
+# Toca das Corujas
+# Códigos Binários,
+# Funções de Onda e
+# Teoria do Orbital Molecular Inc.
+# Unidade Barão Geraldo CX
+#
+# 2026_10_31_01_38_12
+
+xtdc_vars(){
+    COLOR_HEADER='\033[1;36m'
+    COLOR_SUCCESS='\033[1;32m'
+    COLOR_ERROR='\033[1;31m'
+    COLOR_WARNING='\033[1;33m'
+    COLOR_INFO='\033[1;34m'
+    COLOR_RESET='\033[0m'
+
+    PKGS=(
+        baobab catfish elementary-xfce-icon-theme eog evince ffmpeg fonts-ubuntu geany gparted keepassxc kodi
+        language-pack-pt language-pack-pt-base language-selector-common menulibre mesa-utils mesa-utils-extra
+        network-manager numlockx p7zip p7zip-full shotwell simplescreenrecorder synaptic transmission
+        unrar unzip vlc wbrazilian xclip xfce4-clipman xfce4-indicator-plugin
+        xfce4-panel-profiles xfce4-power-manager xfce4-power-manager-data xfce4-power-manager-plugins
+        xfce4-screensaver xfce4-screenshooter xfce4-statusnotifier-plugin xfce4-taskmanager xfpanel-switch yt-dlp 
+    )
+
+    BRAVE_EXT_DIR="/opt/brave.com/brave/extensions"
+    declare -A BRAVE_EXT=(
+        ["ponfpcnoihfmfllpaingbgckeeldkhle"]="Enhancer for YouTube"
+        ["mnjggcdmjocbbbhaepdhchncahnbgone"]="SponsorBlock para YouTube"
+    )
+
+    INSTALL_DIR="/xtdc/appimages"
+    
+    LO_URL="https://appimages.libreitalia.org/LibreOffice-still.standard-x86_64.AppImage"
+    LO_FILENAME="LibreOffice-still.standard-x86_64.AppImage"
+    LO_DESKTOP_FILE="/usr/share/applications/libreoffice-appimage.desktop"
+    
+    PINTA_URL="https://github.com/pkgforge-dev/Pinta-AppImage/releases/download/3.1.2-1%402026-07-22_1784722273/Pinta-3.1.2-1-anylinux-x86_64.AppImage"
+    PINTA_FILENAME="Pinta.AppImage"
+    PINTA_DESKTOP_FILE="/usr/share/applications/pinta.desktop"
+    
+    SC_URL="https://github.com/pkgforge-dev/SpeedCrunch-AppImage/releases/download/0.12%402026-07-01_1782912074/SpeedCrunch-0.12-anylinux-x86_64.AppImage"
+    SC_FILENAME="SpeedCrunch.AppImage"
+    SC_DESKTOP_FILE="/usr/share/applications/speedcrunch.desktop"
+    
+    LIGHTDM_CONF_DIR="/usr/share/lightdm/lightdm-gtk-greeter.conf.d"
+
+    GH_URL="https://github.com/Pinhalito/xtdc/raw/refs/heads/main"
+    DOWNLOAD_DIR="/xtdc"
+    FILE_LIST=(
+        "xtdc_icons.tar.gz"
+        "xtdc_theme.tar.gz"
+        "xtdc_ttf.tar.gz"
+        "xtdc_skel.tar.gz"
+        "xtdc"
+    )
+
+    PACOTES_REMOVER=(
+    )
+    printf "${COLOR_HEADER}VARIÁVEIS CARREGADAS${COLOR_RESET}\n\n"
+}
+
+
+xtdc_ptbr(){
+set -euo pipefail
+
+LOCALE="pt_BR.UTF-8"
+LANGUAGE_VALUE="pt_BR:pt"
+
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get update
+apt-get install -y locales ca-certificates
+
+LOCALE_GEN_LINE="${LOCALE} UTF-8"
+if grep -qE '^[#]*[[:space:]]*'"$LOCALE_GEN_LINE"'\b' /etc/locale.gen; then
+  sed -i -E 's/^[#][[:space:]]*('"$LOCALE_GEN_LINE"')/\1/' /etc/locale.gen
+else
+  echo "$LOCALE_GEN_LINE" >> /etc/locale.gen
+fi
+
+locale-gen "$LOCALE"
+
+cat > /etc/default/locale <<EOF
+LANG=${LOCALE}
+LANGUAGE=${LANGUAGE_VALUE}
+LC_ALL=${LOCALE}
+EOF
+
+update-locale LANG="${LOCALE}" LANGUAGE="${LANGUAGE_VALUE}" LC_ALL="${LOCALE}" || true
+
+install -d -m 0755 /etc/skel
+
+cat > /etc/skel/.profile <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+cat > /etc/skel/.bashrc <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+cat > /root/.profile <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+cat > /root/.bashrc <<EOF
+export LANG=${LOCALE}
+export LANGUAGE=${LANGUAGE_VALUE}
+export LC_ALL=${LOCALE}
+EOF
+
+echo "OK. Verificando:"
+echo "Sistema:"
+locale || true
+
+echo
+echo "Arquivos relevantes:"
+echo "/etc/default/locale"
+echo "/etc/skel/.profile"
+echo "/etc/skel/.bashrc"
+}
+
+
+xtdc_pkg(){
+    apt install -y curl
+
+    printf "${COLOR_HEADER}INSTALANDO PACOTES E APLICATIVOS${COLOR_RESET}\n\n"
+    printf "Atualizando repositórios..."
+    if apt-get update -qq; then
+        printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+    else
+        printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
+        return 1
+    fi
+
+    printf "\nVERIFICANDO PACOTES DO REPOSITÓRIO\n"
+
+    local -a installed_pkgs
+    local -a to_install
+
+    for pkg in "${PKGS[@]}"; do
+        if dpkg -s "$pkg" >/dev/null 2>&1; then
+            installed_pkgs+=("$pkg")
+        else
+            to_install+=("$pkg")
+        fi
+    done
+
+    if [ ${#to_install[@]} -gt 0 ]; then
+        printf "\nINSTALANDO %d PACOTES\n" "${#to_install[@]}"
+
+        if apt-get install -y --no-install-recommends "${to_install[@]}" >/dev/null 2>&1; then
+            printf "${COLOR_SUCCESS}Pacotes instalados com sucesso${COLOR_RESET}\n"
+        else
+            printf "${COLOR_ERROR}Erro na instalação de alguns pacotes${COLOR_RESET}\n"
+        fi
+    else
+        printf "${COLOR_INFO}Todos os pacotes já estão instalados${COLOR_RESET}\n"
+    fi
+    printf "\n${COLOR_SUCCESS}Instalação concluída com sucesso${COLOR_RESET}\n"
+}
+
+
+xtdc_brave(){
+    printf "Brave Browser..."
+    if ! command -v brave-browser >/dev/null &&
+       ! [ -x /opt/brave.com/brave/brave ]; then
+        if curl -fsSL https://dl.brave.com/install.sh | bash >/dev/null 2>&1; then
+            printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+        else
+            printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
+        fi
+    else
+        printf "${COLOR_INFO}JÁ INSTALADO${COLOR_RESET}\n"
+    fi
+
+    printf "\nEXTENSÕES DO BRAVE\n"
+    mkdir -p -m 755 "$BRAVE_EXT_DIR" 2>/dev/null
+
+    for ext_id in "${!BRAVE_EXT[@]}"; do
+        printf "${BRAVE_EXT[$ext_id]}..."
+        if echo '{ "external_update_url": "https://clients2.google.com/service/update2/crx" }' \
+            > "${BRAVE_EXT_DIR}/${ext_id}.json" 2>/dev/null; then
+            printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+        else
+            printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
+        fi
+    done
+}
+
+
+xtdc_appimage(){
+    mkdir -p -m 755 "$INSTALL_DIR" || {
+        echo "Erro ao criar diretório $INSTALL_DIR"
+        return 1
+    }
+    echo "Baixando LibreOffice AppImage..."
+    wget -q --show-progress -O "$INSTALL_DIR/$LO_FILENAME" "$LO_URL" || {
+        echo "Erro ao baixar o arquivo"
+        return 1
+    }
+
+    echo "Baixando Pinta AppImage..."
+    wget -q --show-progress -O "$INSTALL_DIR/$PINTA_FILENAME" "$PINTA_URL" || {
+        echo "Erro ao baixar o arquivo"
+        return 1
+    }
+
+        echo "Baixando SpeedCrunch AppImage..."
+    wget -q --show-progress -O "$INSTALL_DIR/$SC_FILENAME" "$SC_URL" || {
+        echo "Erro ao baixar o arquivo"
+        return 1
+    }
+    
+    chmod +x "$INSTALL_DIR/$LO_FILENAME" || {
+        echo "Erro ao tornar o AppImage executável"
+        return 1
+    }
+
+    chmod +x "$INSTALL_DIR/$PINTA_FILENAME" || {
+        echo "Erro ao tornar o AppImage executável"
+        return 1
+    }
+
+    chmod +x "$INSTALL_DIR/$SC_FILENAME" || {
+        echo "Erro ao tornar o AppImage executável"
+        return 1
+    }
+
+
+    echo "Criando arquivos .desktop..."
+    cat > "$LO_DESKTOP_FILE" <<'EOL'
+[Desktop Entry]
+Type=Application
+Name=LibreOffice
+Comment=Suíte Office Completa
+Exec=/xtdc/appimages/LibreOffice-still.standard-x86_64.AppImage
+Icon=libreoffice
+Terminal=false
+Categories=Office;
+MimeType=application/vnd.openxmlformats-officedocument.wordprocessingml.document;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;application/vnd.openxmlformats-officedocument.presentationml.presentation;application/msword;application/vnd.ms-excel;application/vnd.ms-powerpoint;application/vnd.oasis.opendocument.text;application/vnd.oasis.opendocument.spreadsheet;application/vnd.oasis.opendocument.presentation;
+StartupNotify=true
+EOL
+
+    cat > "$PINTA_DESKTOP_FILE" <<'EOL'
+[Desktop Entry]
+Name=Pinta
+Comment=Editor de bitmap (MS Paint)
+TryExec=pinta
+Exec=/xtdc/appimages/Pinta.AppImage
+Icon=pinta
+StartupNotify=false
+StartupWMClass=Pinta
+Terminal=false
+Type=Application
+Categories=Graphics;
+Keywords=draw;drawing;paint;painting;graphics;raster;2d;
+MimeType=image/bmp;image/gif;image/jpeg;image/jpg;image/pjpeg;image/png;image/svg+xml;image/tiff;image/x-bmp;image/x-gray;image/x-icb;image/x-ico;image/x-png;image/x-portable-anymap;image/x-portable-bitmap;image/x-portable-graymap;image/x-portable-pixmap;image/x-xbitmap;image/x-xpixmap;image/x-pcx;image/x-targa;image/x-tga;image/openraster;
+EOL
+
+    cat > "$SC_DESKTOP_FILE" <<'EOL'
+[Desktop Entry]
+Name=Calculadora
+Comment=Calculadora
+Exec=/bin/xtdc xtdc_calculadoranotopo
+Icon=speedcrunch
+Terminal=false
+Type=Application
+Categories=Utility;
+EOL
+
+    update-desktop-database || {
+        echo "Erro ao atualizar o banco de dados de desktop"
+        return 1
+    }
+
+    echo "Configurando como aplicativo padrão..."
+    local MIME_TYPES=(
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        "application/msword"
+        "application/vnd.ms-excel"
+        "application/vnd.ms-powerpoint"
+    )
+
+    for mime in "${MIME_TYPES[@]}"; do
+        xdg-mime default libreoffice-appimage.desktop "$mime" || {
+            echo "Erro ao configurar padrão para $mime"
+        }
+    done
+
+    echo "Instalação concluída com sucesso!"
+    echo "LibreOffice AppImage instalado em: $INSTALL_DIR/$LO_FILENAME"
+    echo "Pinta AppImage instalado em: $INSTALL_DIR/$PINTA_FILENAME"
+}
+
+
+xtdc_download(){
+        mkdir -p -m 755 "$DOWNLOAD_DIR" || {
+        printf "${COLOR_ERROR}Falha ao criar diretório ${DOWNLOAD_DIR}${COLOR_RESET}\n"
+        return 1
+    }
+
+    printf "${COLOR_HEADER}Iniciando downloads...${COLOR_RESET}\n"
+    for file in "${FILE_LIST[@]}"; do
+        printf "${COLOR_INFO}Baixando ${file}...${COLOR_RESET}\n"
+        curl -sL "${GH_URL}/${file}" -o "${DOWNLOAD_DIR}/${file}" || {
+            printf "${COLOR_ERROR}Falha no download de ${file}${COLOR_RESET}\n"
+            continue
+        }
+        printf "${COLOR_SUCCESS}${file} baixado com sucesso${COLOR_RESET}\n"
+    done
+
+    chmod -R u+rwX,go+rX "$DOWNLOAD_DIR" > /dev/null 2>&1
+    printf "${COLOR_SUCCESS}Downloads concluídos${COLOR_RESET}\n"
+}
+
+
+xtdc_tema(){
+    if [ -d "/usr/share/lightdm" ]; then
+        mkdir -p -m 755 "${LIGHTDM_CONF_DIR}" && chmod 755 "${LIGHTDM_CONF_DIR}" && {
+            cat <<'EOF' | tee "${LIGHTDM_CONF_DIR}/01_ubuntu.conf" >/dev/null
+[greeter]
+background=#000000
+theme-name=xtdc_theme
+icon-theme-name=xtdc_svg
+font-name=Ubuntu 13
+indicators=~clock;
+clock-format=%d %b, %H:%M%S
+EOF
+
+            cat <<'EOF' | tee "${LIGHTDM_CONF_DIR}/30_xubuntu.conf" >/dev/null
+[greeter]
+background=#000000
+theme-name=xtdc_theme
+icon-theme-name=xtdc_svg
+font-name=Noto Sans 11
+keyboard=onboard
+screensaver-timeout=60
+EOF
+
+            chmod 644 "${LIGHTDM_CONF_DIR}"/*.conf 2>/dev/null
+            printf "${COLOR_SUCCESS}OK${COLOR_RESET}\n"
+        } || {
+            printf "${COLOR_ERROR}FALHA${COLOR_RESET}\n"
+            return 1
+        }
+    fi
+
+    printf "${COLOR_HEADER}Iniciando instalação...${COLOR_RESET}\n"
+
+    printf "${COLOR_INFO}Instalando skel...${COLOR_RESET}\n"
+    if [ -d /etc/skel ]; then
+        cp -a /etc/skel /etc/skel_bkp
+    fi
+    tar -xzf "${DOWNLOAD_DIR}/xtdc_skel.tar.gz" -C /etc/ || {
+    printf "${COLOR_ERROR}Falha ao descompactar skel${COLOR_RESET}\n"
+    return 1
+    }
+
+    printf "${COLOR_INFO}Instalando ícones...${COLOR_RESET}\n"
+    tar -xzf "${DOWNLOAD_DIR}/xtdc_icons.tar.gz" -C /usr/share/icons/ || {
+        printf "${COLOR_ERROR}Falha ao descompactar ícones${COLOR_RESET}\n"
+        return 1
+    }
+
+    printf "${COLOR_INFO}Instalando temas...${COLOR_RESET}\n"
+    tar -xzf "${DOWNLOAD_DIR}/xtdc_theme.tar.gz" -C /usr/share/themes/ || {
+        printf "${COLOR_ERROR}Falha ao descompactar temas${COLOR_RESET}\n"
+        return 1
+    }
+
+    printf "${COLOR_INFO}Instalando fontes...${COLOR_RESET}\n"
+    tar -xzf "${DOWNLOAD_DIR}/xtdc_ttf.tar.gz" -C /usr/share/fonts/truetype/ || {
+        printf "${COLOR_ERROR}Falha ao descompactar fontes${COLOR_RESET}\n"
+        return 1
+    }
+
+    printf "${COLOR_INFO}Instalando executável...${COLOR_RESET}\n"
+    mv "${DOWNLOAD_DIR}/xtdc" /bin/ || {
+        printf "${COLOR_ERROR}Falha ao mover o executável${COLOR_RESET}\n"
+        return 1
+    }
+
+    chmod 755 /bin/xtdc || {
+        printf "${COLOR_ERROR}Falha ao definir permissões do executável${COLOR_RESET}\n"
+        return 1
+    }
+
+    if command -v fc-cache >/dev/null 2>&1; then
+        printf "${COLOR_INFO}Atualizando cache de fontes...${COLOR_RESET}\n"
+        fc-cache -f > /dev/null 2>&1
+    fi
+
+    printf "${COLOR_SUCCESS}Instalação concluída com sucesso${COLOR_RESET}\n"
+    printf "${COLOR_INFO}Os seguintes itens foram instalados:\n"
+    printf "- Ícones: /usr/share/icons/xtdc_icons e /usr/share/icons/xtdc_svg\n"
+    printf "- Temas: /usr/share/themes/xtdc_theme e /usr/share/themes/xtdc_dark\n"
+    printf "- Fontes: /usr/share/fonts/truetype/xtdc_ttf\n"
+    printf "- Executável: /bin/xtdc (com permissões 755)${COLOR_RESET}\n"
+}
+
+#FIM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
