@@ -1,4 +1,21 @@
-#!/usr/bin/env bash
+# #!/usr/bin/env bash
+#
+#######################
+#    ^...^  `^...^´   #
+#   /_o,o_\ /_O,O_\   #
+#   |):::(| |):::(|   #
+# ====" "=====" "==== #
+#         TdC         #
+#      1998-2026      #
+#######################
+#
+# Toca das Corujas
+# Códigos Binários,
+# Funções de Onda e
+# Teoria do Orbital Molecular Inc.
+# Unidade Barão Geraldo CX
+#
+
 
 read -r -p "Localização de A.txt: " arquivo_a
 read -r -p "Localização de B.txt: " arquivo_b
