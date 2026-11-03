@@ -107,56 +107,60 @@ for link do
 done
 ' sh {} +
 }
-
-xtdc_mostrapid(){
-    "$@" &
-sleep 1
+xtdc_mostrapid() {
 wmctrl -lx
 }
 
-
-xtdc_terminalnotopo(){
+xtdc_terminalnotopo() {
     xfce4-terminal &
-for i in $(seq 1 100); do
-  ID=$(wmctrl -lx | grep -i 'xfce4-terminal\.xfce4-terminal' | awk '{print $1; exit}')
-  [ -n "$ID" ] && wmctrl -i -r "$ID" -b add,above && return 0
-  sleep 0.1
-done
+    for i in $(seq 1 100); do
+        ID=$(wmctrl -lx | awk 'tolower($3) ~ /xfce4-terminal\.xfce4-terminal/ {print $1; exit}')
+        if [ -n "$ID" ]; then
+            wmctrl -i -r "$ID" -b add,above
+            return $?
+        fi
+        sleep 0.1
+    done
+    return 1
 }
 
-
-xtdc_calculadoranotopo(){
+xtdc_calculadoranotopo() {
     speedcrunch &
-for i in $(seq 1 100); do
-    ID=$(wmctrl -lx | grep -i speedcrunch | awk '{print $1; exit}')
-    [ -n "$ID" ] && wmctrl -i -r "$ID" -b add,above && return 0
-    sleep 0.1
-done
+    for i in $(seq 1 100); do
+        ID=$(wmctrl -lx | awk 'tolower($3) ~ /speedcrunch/ {print $1; exit}')
+        if [ -n "$ID" ]; then
+            wmctrl -i -r "$ID" -b add,above
+            return $?
+        fi
+        sleep 0.1
+    done
+    return 1
 }
 
-
-xtdc_xtmnotopo(){
+xtdc_xtmnotopo() {
     xfce4-taskmanager &
     for i in $(seq 1 100); do
-        ID=$(wmctrl -lx | grep -i 'xfce4-taskmanager.Xfce4-taskmanager' | awk '{print $1; exit}')
+        ID=$(wmctrl -lx | awk 'tolower($3) ~ /xfce4-taskmanager\.xfce4-taskmanager/ {print $1; exit}')
         if [ -n "$ID" ]; then
             wmctrl -i -r "$ID" -b add,above
-            return 0
+            return $?
         fi
         sleep 0.1
     done
+    return 1
 }
 
-xtdc_gsmnotopo(){
+xtdc_gsmnotopo() {
     gnome-system-monitor &
     for i in $(seq 1 100); do
-        ID=$(wmctrl -lx | grep -i 'gnome-system-monitor\.Gnome-system-monitor' | awk '{print $1; exit}')
+        ID=$(wmctrl -lx | awk 'tolower($3) ~ /gnome-system-monitor\.gnome-system-monitor/ {print $1; exit}')
         if [ -n "$ID" ]; then
             wmctrl -i -r "$ID" -b add,above
-            return 0
+            return $?
         fi
         sleep 0.1
     done
+    return 1
 }
 
 
