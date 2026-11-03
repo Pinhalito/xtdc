@@ -15,15 +15,28 @@
 # Teoria do Orbital Molecular Inc.
 # Unidade Barão Geraldo CX
 #
-# 2026_08_05_12_29_26
+# 2026_11_02_21_11_45
 
 
 xtdc_carga(){
-exec bash    
+ 
 if [ -f /bin/xtdc ]; then
     source /bin/xtdc
-notify-send -t 3000 -i dialog-information "XTDC" "Funções carregadas em: $(date +%H:%M:%S)"
+    notify-send -t 3000 -i dialog-information "XTDC" "Funções carregadas em: $(date +%H:%M:%S)"
 fi
+}
+
+xtdc_memoria(){
+    (mpstat -P ALL; echo; free)
+}
+
+
+xtdc_listapkg(){
+dpkg-query -W -f='${binary:Package}\n'
+}
+
+xtdc_listaverpkg(){
+dpkg-query -W -f='${binary:Package}\t${Version}\n'
 }
 
 xtdc_mp4(){
@@ -95,11 +108,18 @@ done
 ' sh {} +
 }
 
+xtdc_mostrapid(){
+    "$@" &
+sleep 1
+wmctrl -lx
+}
+
+
 xtdc_terminalnotopo(){
     xfce4-terminal &
 for i in $(seq 1 100); do
   ID=$(wmctrl -lx | grep -i 'xfce4-terminal\.xfce4-terminal' | awk '{print $1; exit}')
-  [ -n "$ID" ] && wmctrl -i -r "$ID" -b add,above && exit 0
+  [ -n "$ID" ] && wmctrl -i -r "$ID" -b add,above && return 0
   sleep 0.1
 done
 }
@@ -107,21 +127,36 @@ done
 
 xtdc_calculadoranotopo(){
     speedcrunch &
-for i in $(seq 1 50); do
-    ID=$(wmctrl -l | grep -i speedcrunch | awk '{print $1; exit}')
-    [ -n "$ID" ] && wmctrl -i -r "$ID" -b add,above && exit 0
+for i in $(seq 1 100); do
+    ID=$(wmctrl -lx | grep -i speedcrunch | awk '{print $1; exit}')
+    [ -n "$ID" ] && wmctrl -i -r "$ID" -b add,above && return 0
     sleep 0.1
 done
 }
 
 
-xtdc_gerenciadornotopo(){
+xtdc_xtmnotopo(){
+    xfce4-taskmanager &
+    for i in $(seq 1 100); do
+        ID=$(wmctrl -lx | grep -i 'xfce4-taskmanager.Xfce4-taskmanager' | awk '{print $1; exit}')
+        if [ -n "$ID" ]; then
+            wmctrl -i -r "$ID" -b add,above
+            return 0
+        fi
+        sleep 0.1
+    done
+}
+
+xtdc_gsmnotopo(){
     gnome-system-monitor &
-for i in $(seq 1 50); do
-    ID=$(wmctrl -l | grep -i gnome-system-monitor | awk '{print $1; exit}')
-    [ -n "$ID" ] && wmctrl -i -r "$ID" -b add,above && exit 0
-    sleep 0.1
-done
+    for i in $(seq 1 100); do
+        ID=$(wmctrl -lx | grep -i 'gnome-system-monitor\.Gnome-system-monitor' | awk '{print $1; exit}')
+        if [ -n "$ID" ]; then
+            wmctrl -i -r "$ID" -b add,above
+            return 0
+        fi
+        sleep 0.1
+    done
 }
 
 
